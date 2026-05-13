@@ -258,11 +258,7 @@
     <label>Dein Name
       <input type="text" id="currentUser" placeholder="z.B. Max Mustermann" autocomplete="name" style="min-width: 220px;">
     </label>
-    <button id="exportBtn" class="secondary">📤 JSON exportieren</button>
-    <button id="importBtn" class="secondary">📥 JSON importieren</button>
-    <input type="file" id="importFile" accept="application/json" style="display:none">
-    <button id="shareBtn" class="secondary">🔗 Link mit aktuellem Stand kopieren</button>
-    <button id="resetBtn" class="danger">🗑️ Alles zurücksetzen</button>
+    <span id="connectionStatus" style="font-size:13px; padding:6px 10px; border-radius:6px; background:#f3f3f1;">⚪ verbinde…</span>
   </div>
   <div class="legend">
     <div class="legend-item"><div class="legend-swatch" style="background:var(--color-chi-ortho)"></div>Chi/Ortho</div>
@@ -341,7 +337,27 @@
 
 <div class="toast" id="toast"></div>
 
-<script>
+<script type="module">
+// ============================================================
+// Firebase (Live-Sync)
+// ============================================================
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-app.js";
+import { getDatabase, ref, onValue, set, remove } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-database.js";
+
+const firebaseConfig = {
+  apiKey: "AIzaSyASadawEJWmNLt54JqjPWY5jS1zydSFNSQ",
+  authDomain: "pruefungsplan-2026.firebaseapp.com",
+  databaseURL: "https://pruefungsplan-2026-default-rtdb.europe-west1.firebasedatabase.app",
+  projectId: "pruefungsplan-2026",
+  storageBucket: "pruefungsplan-2026.firebasestorage.app",
+  messagingSenderId: "634668780741",
+  appId: "1:634668780741:web:f42a3438ecc7d2315c34ac"
+};
+
+const fbApp = initializeApp(firebaseConfig);
+const fbDb = getDatabase(fbApp);
+const fbRoot = ref(fbDb, "pruefungsplan");
+
 // ============================================================
 // SLOT-DATEN — falls etwas nicht stimmt, hier korrigieren!
 // Fachrichtungen: "chi-ortho", "innere", "neuro"
@@ -412,58 +428,26 @@ const FACH_LABELS = {
 };
 
 // ============================================================
-// State
+// State (assignments live in Firebase, currentUser local)
 // ============================================================
-const STORAGE_KEY = "pruefungsplan_v1";
+const USER_KEY = "pruefungsplan_user";
 
-const defaultState = () => ({
-  assignments: { kw36: {}, kw37: {} }, // { kw36: { 1: "Name", ... } }
-  currentUser: "",
-});
+const state = {
+  assignments: { kw36: {}, kw37: {} },
+  currentUser: localStorage.getItem(USER_KEY) || "",
+};
 
-let state = loadState();
+function saveCurrentUser() {
+  localStorage.setItem(USER_KEY, state.currentUser);
+}
 
-function loadState() {
-  // Try URL hash first
-  if (location.hash.startsWith("#data=")) {
-    try {
-      const decoded = decodeURIComponent(escape(atob(location.hash.slice(6))));
-      const s = JSON.parse(decoded);
-      saveState(s);
-      history.replaceState(null, "", location.pathname);
-      showToast("Stand aus Link geladen");
-      return mergeWithDefault(s);
-    } catch(e) { console.warn("Konnte URL-Stand nicht laden", e); }
+function writeSlot(week, slotN, name) {
+  const slotRef = ref(fbDb, `pruefungsplan/${week}/${slotN}`);
+  if (name) {
+    return set(slotRef, name);
+  } else {
+    return remove(slotRef);
   }
-  try {
-    const raw = localStorage.getItem(STORAGE_KEY);
-    if (raw) return mergeWithDefault(JSON.parse(raw));
-  } catch(e) { console.warn(e); }
-  return defaultState();
-}
-
-function mergeWithDefault(s) {
-  return {
-    assignments: {
-      kw36: (s.assignments && s.assignments.kw36) || {},
-      kw37: (s.assignments && s.assignments.kw37) || {},
-    },
-    currentUser: s.currentUser || "",
-  };
-}
-
-function getAllPeople() {
-  const set = new Set();
-  for (const wk of ["kw36", "kw37"]) {
-    for (const name of Object.values(state.assignments[wk])) {
-      if (name && name.trim()) set.add(name.trim());
-    }
-  }
-  return [...set].sort((a, b) => a.localeCompare(b, "de"));
-}
-
-function saveState(s = state) {
-  localStorage.setItem(STORAGE_KEY, JSON.stringify(s));
 }
 
 // ============================================================
@@ -474,7 +458,7 @@ function initUserInput() {
   input.value = state.currentUser || "";
   input.addEventListener("input", (e) => {
     state.currentUser = e.target.value.trim();
-    saveState();
+    saveCurrentUser();
     renderAll();
   });
 }
@@ -511,12 +495,10 @@ function renderWeek(weekKey, tbodyId) {
       const wk = btn.dataset.week;
       const sl = btn.dataset.slot;
       if (state.assignments[wk][sl] === state.currentUser) {
-        delete state.assignments[wk][sl];
+        writeSlot(wk, sl, null);
       } else {
-        state.assignments[wk][sl] = state.currentUser;
+        writeSlot(wk, sl, state.currentUser);
       }
-      saveState();
-      renderAll();
     });
   });
 }
@@ -671,64 +653,6 @@ function renderAll() {
 // ============================================================
 // Events
 // ============================================================
-document.getElementById("exportBtn").addEventListener("click", () => {
-  const blob = new Blob([JSON.stringify(state, null, 2)], { type: "application/json" });
-  const url = URL.createObjectURL(blob);
-  const a = document.createElement("a");
-  const ts = new Date().toISOString().slice(0, 16).replace(/[:T]/g, "-");
-  a.href = url;
-  a.download = `pruefungsplan-${ts}.json`;
-  a.click();
-  URL.revokeObjectURL(url);
-  showToast("JSON heruntergeladen");
-});
-
-document.getElementById("importBtn").addEventListener("click", () => {
-  document.getElementById("importFile").click();
-});
-
-document.getElementById("importFile").addEventListener("change", (e) => {
-  const file = e.target.files[0];
-  if (!file) return;
-  const reader = new FileReader();
-  reader.onload = (ev) => {
-    try {
-      const imported = JSON.parse(ev.target.result);
-      state = mergeWithDefault(imported);
-      saveState();
-      document.getElementById("currentUser").value = state.currentUser || "";
-      renderAll();
-      showToast("Stand importiert");
-    } catch(err) {
-      alert("Fehler beim Importieren: " + err.message);
-    }
-  };
-  reader.readAsText(file);
-  e.target.value = "";
-});
-
-document.getElementById("shareBtn").addEventListener("click", async () => {
-  const json = JSON.stringify(state);
-  const encoded = btoa(unescape(encodeURIComponent(json)));
-  const url = `${location.origin}${location.pathname}#data=${encoded}`;
-  try {
-    await navigator.clipboard.writeText(url);
-    showToast("Link in Zwischenablage kopiert (" + url.length + " Zeichen)");
-  } catch {
-    prompt("Link kopieren:", url);
-  }
-});
-
-document.getElementById("resetBtn").addEventListener("click", () => {
-  if (confirm("Wirklich ALLE Eintragungen löschen? Das betrifft alle 25 Personen.")) {
-    state = defaultState();
-    saveState();
-    document.getElementById("currentUser").value = "";
-    renderAll();
-    showToast("Zurückgesetzt");
-  }
-});
-
 function showToast(msg) {
   const t = document.getElementById("toast");
   t.textContent = msg;
@@ -737,10 +661,27 @@ function showToast(msg) {
 }
 
 // ============================================================
-// Init
+// Init + Firebase Live-Listener
 // ============================================================
 initUserInput();
 renderAll();
+
+const statusEl = document.getElementById("connectionStatus");
+
+onValue(fbRoot, (snapshot) => {
+  const data = snapshot.val() || {};
+  state.assignments.kw36 = data.kw36 || {};
+  state.assignments.kw37 = data.kw37 || {};
+  statusEl.textContent = "🟢 Live verbunden";
+  statusEl.style.background = "#dcfce7";
+  statusEl.style.color = "#166534";
+  renderAll();
+}, (error) => {
+  console.error("Firebase Fehler:", error);
+  statusEl.textContent = "🔴 Verbindungsfehler";
+  statusEl.style.background = "#fee2e2";
+  statusEl.style.color = "#991b1b";
+});
 </script>
 
 </body>
