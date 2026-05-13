@@ -136,6 +136,15 @@
   tr.fach-innere { background-color: rgba(240, 204, 121, 0.25); }
   tr.fach-neuro { background-color: rgba(166, 199, 129, 0.25); }
   tr:hover { filter: brightness(0.97); }
+  tr.double-booked {
+    outline: 2px solid #dc2626;
+    outline-offset: -2px;
+    background-color: rgba(220, 38, 38, 0.12) !important;
+  }
+  tr.double-booked td:first-child {
+    background-color: #dc2626 !important;
+    color: white;
+  }
   .slot-name {
     font-weight: 500;
     min-width: 110px;
@@ -342,7 +351,7 @@
 // Firebase (Live-Sync)
 // ============================================================
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-app.js";
-import { getDatabase, ref, onValue, set, remove } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-database.js";
+import { getDatabase, ref, onValue, set, remove, push, get } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-database.js";
 
 const firebaseConfig = {
   apiKey: "AIzaSyASadawEJWmNLt54JqjPWY5jS1zydSFNSQ",
@@ -441,13 +450,60 @@ function saveCurrentUser() {
   localStorage.setItem(USER_KEY, state.currentUser);
 }
 
-function writeSlot(week, slotN, name) {
-  const slotRef = ref(fbDb, `pruefungsplan/${week}/${slotN}`);
-  if (name) {
-    return set(slotRef, name);
-  } else {
-    return remove(slotRef);
+function normalizeSlot(val) {
+  if (val == null) return [];
+  if (typeof val === "string") return [val];
+  if (Array.isArray(val)) return val.filter(n => typeof n === "string" && n);
+  if (typeof val === "object") return Object.values(val).filter(n => typeof n === "string" && n);
+  return [];
+}
+
+function normalizeWeek(weekData) {
+  const out = {};
+  if (!weekData) return out;
+  for (const [slotN, val] of Object.entries(weekData)) {
+    out[slotN] = normalizeSlot(val);
   }
+  return out;
+}
+
+async function toggleClaim(week, slotN, name) {
+  if (!name) return;
+  const slotPath = `pruefungsplan/${week}/${slotN}`;
+  const slotRef = ref(fbDb, slotPath);
+  const snap = await get(slotRef);
+  const current = snap.val();
+
+  // Already legacy single-name string?
+  if (typeof current === "string") {
+    if (current === name) {
+      // Was only me — clear slot
+      await remove(slotRef);
+    } else {
+      // Convert to multi-entry object: old name + new name
+      const k1 = push(slotRef).key;
+      const k2 = push(slotRef).key;
+      await set(slotRef, { [k1]: current, [k2]: name });
+    }
+    return;
+  }
+
+  // Object format: find my push-key
+  if (current && typeof current === "object") {
+    let myKey = null;
+    for (const [k, v] of Object.entries(current)) {
+      if (v === name) { myKey = k; break; }
+    }
+    if (myKey) {
+      await remove(ref(fbDb, `${slotPath}/${myKey}`));
+    } else {
+      await push(slotRef, name);
+    }
+    return;
+  }
+
+  // Slot was empty — add me
+  await push(slotRef, name);
 }
 
 // ============================================================
@@ -467,20 +523,31 @@ function renderWeek(weekKey, tbodyId) {
   const tbody = document.getElementById(tbodyId);
   tbody.innerHTML = "";
   SLOTS[weekKey].forEach(slot => {
-    const assignedTo = state.assignments[weekKey][slot.n] || "";
+    const names = state.assignments[weekKey][slot.n] || [];
     const tr = document.createElement("tr");
     tr.className = `fach-${slot.fach}`;
+    if (names.length > 1) tr.classList.add("double-booked");
 
+    let nameDisplay;
     let nameCellClass = "slot-name";
-    if (!assignedTo) nameCellClass += " empty";
-    else if (assignedTo === state.currentUser) nameCellClass += " mine";
+    if (names.length === 0) {
+      nameDisplay = "frei";
+      nameCellClass += " empty";
+    } else if (names.length === 1) {
+      nameDisplay = escapeHtml(names[0]);
+      if (names[0] === state.currentUser) nameCellClass += " mine";
+    } else {
+      nameDisplay = names.map(escapeHtml).join(", ") + ` <span class="badge error">${names.length}× doppelt</span>`;
+      nameCellClass += " conflict";
+    }
 
-    const claimableByMe = state.currentUser && (!assignedTo || assignedTo === state.currentUser);
-    const btnLabel = assignedTo === state.currentUser ? "✕ frei" : "+ ich";
+    const userInList = state.currentUser && names.includes(state.currentUser);
+    const canClick = !!state.currentUser;
+    const btnLabel = userInList ? "✕ mich entfernen" : "+ ich";
 
     tr.innerHTML = `
       <td class="row-num">${slot.n}</td>
-      <td class="${nameCellClass}">${assignedTo || "frei"}${claimableByMe ? `<button class="claim-btn" data-week="${weekKey}" data-slot="${slot.n}">${btnLabel}</button>` : ""}</td>
+      <td class="${nameCellClass}">${nameDisplay}${canClick ? `<button class="claim-btn" data-week="${weekKey}" data-slot="${slot.n}">${btnLabel}</button>` : ""}</td>
       <td>${slot.ein}</td>
       <td>${slot.befund}</td>
       <td>${slot.beh}</td>
@@ -494,25 +561,28 @@ function renderWeek(weekKey, tbodyId) {
     btn.addEventListener("click", () => {
       const wk = btn.dataset.week;
       const sl = btn.dataset.slot;
-      if (state.assignments[wk][sl] === state.currentUser) {
-        writeSlot(wk, sl, null);
-      } else {
-        writeSlot(wk, sl, state.currentUser);
-      }
+      toggleClaim(wk, sl, state.currentUser);
     });
   });
+}
+
+function escapeHtml(s) {
+  return String(s).replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
 }
 
 function renderEvaluation() {
   const personSummary = {};
 
   for (const wk of ["kw36", "kw37"]) {
-    for (const [slotN, name] of Object.entries(state.assignments[wk])) {
-      if (!name) continue;
+    for (const [slotN, names] of Object.entries(state.assignments[wk])) {
+      if (!Array.isArray(names) || names.length === 0) continue;
       const slot = SLOTS[wk].find(s => s.n == slotN);
       if (!slot) continue;
-      if (!personSummary[name]) personSummary[name] = { kw36: [], kw37: [] };
-      personSummary[name][wk].push({ slot: slot.n, fach: slot.fach, ein: slot.ein });
+      names.forEach(name => {
+        if (!name) return;
+        if (!personSummary[name]) personSummary[name] = { kw36: [], kw37: [] };
+        personSummary[name][wk].push({ slot: slot.n, fach: slot.fach, ein: slot.ein });
+      });
     }
   }
 
@@ -585,38 +655,54 @@ function renderEvaluation() {
   for (const wk of ["kw36", "kw37"]) {
     SLOTS[wk].forEach(slot => {
       fachStats[slot.fach].total++;
-      if (state.assignments[wk][slot.n]) fachStats[slot.fach].taken++;
+      const names = state.assignments[wk][slot.n];
+      if (Array.isArray(names) && names.length > 0) fachStats[slot.fach].taken++;
     });
   }
   Object.entries(fachStats).forEach(([fach, st]) => {
     const row = document.createElement("div");
     row.className = "stat-row";
-    row.innerHTML = `<span><span class="badge ${fach}">${FACH_LABELS[fach]}</span></span><span><strong>${st.taken}</strong> / ${st.total} belegt</span>`;
+    row.innerHTML = `<span><span class="badge ${fach}">${FACH_LABELS[fach]}</span></span><span><strong>${st.taken}</strong> / ${st.total} Slots mit min. 1 Person</span>`;
     evalStats.appendChild(row);
   });
   const totalSlots = fachStats["chi-ortho"].total + fachStats["innere"].total + fachStats["neuro"].total;
   const totalTaken = fachStats["chi-ortho"].taken + fachStats["innere"].taken + fachStats["neuro"].taken;
   const totalRow = document.createElement("div");
   totalRow.className = "stat-row";
-  totalRow.innerHTML = `<span><strong>Gesamt</strong></span><span><strong>${totalTaken}</strong> / ${totalSlots} belegt</span>`;
+  totalRow.innerHTML = `<span><strong>Gesamt</strong></span><span><strong>${totalTaken}</strong> / ${totalSlots} Slots belegt</span>`;
   evalStats.appendChild(totalRow);
 
-  // Conflicts (multiple names in same slot — sollte nicht passieren, aber sicherheitshalber)
-  // Real "conflict" hier: same person in multiple slots in same week
-  const conflicts = [];
+  // Doppelt belegte Slots: mehrere Personen auf einem Slot
+  const doubleBookings = [];
+  for (const wk of ["kw36", "kw37"]) {
+    const wkLabel = wk === "kw36" ? "KW 36" : "KW 37";
+    for (const [slotN, names] of Object.entries(state.assignments[wk])) {
+      if (Array.isArray(names) && names.length > 1) {
+        const slot = SLOTS[wk].find(s => s.n == slotN);
+        if (!slot) continue;
+        doubleBookings.push(
+          `<strong>${wkLabel} · Slot ${slot.n}</strong> (${slot.ein}, ${FACH_LABELS[slot.fach]}): ` +
+          `<span style="color:#991b1b; font-weight:600">${names.length} Personen</span> — ${names.map(escapeHtml).join(", ")}`
+        );
+      }
+    }
+  }
+  // Zusätzlich: gleiche Person mehrfach in gleicher Woche
+  const sameWeekDuplicates = [];
   for (const name of people) {
     if (personSummary[name].kw36.length > 1) {
-      conflicts.push(`<strong>${name}</strong> hat ${personSummary[name].kw36.length} Slots in KW36: ${personSummary[name].kw36.map(a => `#${a.slot} ${a.ein}`).join(", ")}`);
+      sameWeekDuplicates.push(`<strong>${escapeHtml(name)}</strong> hat ${personSummary[name].kw36.length} Slots in KW 36: ${personSummary[name].kw36.map(a => `#${a.slot} ${a.ein}`).join(", ")}`);
     }
     if (personSummary[name].kw37.length > 1) {
-      conflicts.push(`<strong>${name}</strong> hat ${personSummary[name].kw37.length} Slots in KW37: ${personSummary[name].kw37.map(a => `#${a.slot} ${a.ein}`).join(", ")}`);
+      sameWeekDuplicates.push(`<strong>${escapeHtml(name)}</strong> hat ${personSummary[name].kw37.length} Slots in KW 37: ${personSummary[name].kw37.map(a => `#${a.slot} ${a.ein}`).join(", ")}`);
     }
   }
   const conflictBox = document.getElementById("conflictBox");
   const evalConflicts = document.getElementById("evalConflicts");
-  if (conflicts.length > 0) {
+  const allConflicts = [...doubleBookings, ...sameWeekDuplicates];
+  if (allConflicts.length > 0) {
     conflictBox.style.display = "";
-    evalConflicts.innerHTML = conflicts.map(c => `<li>${c}</li>`).join("");
+    evalConflicts.innerHTML = allConflicts.map(c => `<li>${c}</li>`).join("");
   } else {
     conflictBox.style.display = "none";
   }
@@ -635,7 +721,10 @@ function renderEvaluation() {
   const evalFree = document.getElementById("evalFree");
   evalFree.innerHTML = "";
   for (const wk of ["kw36", "kw37"]) {
-    const free = SLOTS[wk].filter(s => !state.assignments[wk][s.n]);
+    const free = SLOTS[wk].filter(s => {
+      const names = state.assignments[wk][s.n];
+      return !Array.isArray(names) || names.length === 0;
+    });
     const row = document.createElement("div");
     row.className = "stat-row";
     const label = wk === "kw36" ? "KW 36" : "KW 37";
@@ -670,8 +759,8 @@ const statusEl = document.getElementById("connectionStatus");
 
 onValue(fbRoot, (snapshot) => {
   const data = snapshot.val() || {};
-  state.assignments.kw36 = data.kw36 || {};
-  state.assignments.kw37 = data.kw37 || {};
+  state.assignments.kw36 = normalizeWeek(data.kw36);
+  state.assignments.kw37 = normalizeWeek(data.kw37);
   statusEl.textContent = "🟢 Live verbunden";
   statusEl.style.background = "#dcfce7";
   statusEl.style.color = "#166534";
