@@ -1,0 +1,6 @@
+.DS_Store
+.claude/
+IMG_*.JPG
+IMG_*.jpg
+*.json
+!package.json

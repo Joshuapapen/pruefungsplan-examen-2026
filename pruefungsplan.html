@@ -1,0 +1,778 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Physiotherapie Examen 2026 — Prüfungsplan Kohorte 13</title>
+<style>
+  :root {
+    --color-chi-ortho: #F2A5A5;
+    --color-chi-ortho-dark: #D88080;
+    --color-innere: #F0CC79;
+    --color-innere-dark: #C9A04F;
+    --color-neuro: #A6C781;
+    --color-neuro-dark: #7FA45A;
+    --color-bg: #f7f7f5;
+    --color-card: #ffffff;
+    --color-text: #1f1f1f;
+    --color-muted: #6b6b6b;
+    --color-border: #e3e3e0;
+    --color-accent: #2563eb;
+    --color-error: #dc2626;
+    --color-success: #16a34a;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", "Segoe UI", Roboto, sans-serif;
+    background: var(--color-bg);
+    color: var(--color-text);
+    line-height: 1.4;
+    padding: 16px;
+  }
+  h1 {
+    margin: 0 0 4px 0;
+    font-size: 22px;
+  }
+  h2 {
+    margin: 0 0 12px 0;
+    font-size: 18px;
+  }
+  .subtitle {
+    color: var(--color-muted);
+    margin-bottom: 20px;
+    font-size: 14px;
+  }
+  .card {
+    background: var(--color-card);
+    border-radius: 10px;
+    padding: 16px;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+    margin-bottom: 16px;
+  }
+  .controls {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px;
+    align-items: center;
+  }
+  .controls label {
+    display: flex;
+    flex-direction: column;
+    font-size: 12px;
+    color: var(--color-muted);
+    gap: 4px;
+  }
+  select, input[type="text"], button {
+    font-size: 14px;
+    padding: 8px 12px;
+    border-radius: 6px;
+    border: 1px solid var(--color-border);
+    background: white;
+    font-family: inherit;
+  }
+  button {
+    cursor: pointer;
+    background: var(--color-text);
+    color: white;
+    border: none;
+    transition: opacity 0.15s;
+  }
+  button:hover { opacity: 0.85; }
+  button.secondary {
+    background: white;
+    color: var(--color-text);
+    border: 1px solid var(--color-border);
+  }
+  button.danger {
+    background: var(--color-error);
+  }
+  .legend {
+    display: flex;
+    gap: 16px;
+    flex-wrap: wrap;
+    font-size: 13px;
+    margin-top: 8px;
+  }
+  .legend-item {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+  .legend-swatch {
+    width: 16px;
+    height: 16px;
+    border-radius: 3px;
+  }
+  .weeks {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+  }
+  @media (max-width: 1100px) {
+    .weeks { grid-template-columns: 1fr; }
+  }
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 12px;
+  }
+  th, td {
+    padding: 6px 8px;
+    text-align: left;
+    border-bottom: 1px solid var(--color-border);
+  }
+  th {
+    font-weight: 600;
+    background: #fafaf8;
+    position: sticky;
+    top: 0;
+    z-index: 1;
+  }
+  td.fach-chi-ortho, tr.fach-chi-ortho td:first-child { background-color: var(--color-chi-ortho); }
+  td.fach-innere, tr.fach-innere td:first-child { background-color: var(--color-innere); }
+  td.fach-neuro, tr.fach-neuro td:first-child { background-color: var(--color-neuro); }
+  tr.fach-chi-ortho { background-color: rgba(242, 165, 165, 0.25); }
+  tr.fach-innere { background-color: rgba(240, 204, 121, 0.25); }
+  tr.fach-neuro { background-color: rgba(166, 199, 129, 0.25); }
+  tr:hover { filter: brightness(0.97); }
+  .slot-name {
+    font-weight: 500;
+    min-width: 110px;
+  }
+  .slot-name.empty {
+    color: var(--color-muted);
+    font-style: italic;
+    font-weight: normal;
+  }
+  .slot-name.mine {
+    color: var(--color-accent);
+    font-weight: 700;
+  }
+  .slot-name.conflict {
+    color: var(--color-error);
+    font-weight: 700;
+  }
+  .claim-btn {
+    font-size: 11px;
+    padding: 3px 8px;
+    margin-left: 4px;
+  }
+  .row-num {
+    color: var(--color-muted);
+    font-weight: 600;
+    width: 24px;
+  }
+  .eval-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+  }
+  @media (max-width: 900px) {
+    .eval-grid { grid-template-columns: 1fr; }
+  }
+  .eval-section {
+    background: #fafaf8;
+    padding: 12px;
+    border-radius: 8px;
+  }
+  .eval-section h3 {
+    margin: 0 0 8px 0;
+    font-size: 14px;
+  }
+  .eval-section ul {
+    margin: 0;
+    padding-left: 18px;
+    font-size: 13px;
+  }
+  .eval-section li { margin-bottom: 4px; }
+  .badge {
+    display: inline-block;
+    padding: 2px 6px;
+    border-radius: 4px;
+    font-size: 11px;
+    font-weight: 600;
+    margin-left: 4px;
+  }
+  .badge.ok { background: #dcfce7; color: #166534; }
+  .badge.warn { background: #fef3c7; color: #92400e; }
+  .badge.error { background: #fee2e2; color: #991b1b; }
+  .badge.chi-ortho { background: var(--color-chi-ortho); color: #5a2020; }
+  .badge.innere { background: var(--color-innere); color: #5a3f10; }
+  .badge.neuro { background: var(--color-neuro); color: #2a4515; }
+  .stat-row {
+    display: flex;
+    justify-content: space-between;
+    padding: 4px 0;
+    border-bottom: 1px dotted var(--color-border);
+    font-size: 13px;
+  }
+  .stat-row:last-child { border-bottom: none; }
+  .help-text {
+    font-size: 12px;
+    color: var(--color-muted);
+    margin-top: 8px;
+  }
+  details summary {
+    cursor: pointer;
+    font-weight: 600;
+    padding: 6px 0;
+    user-select: none;
+  }
+  .name-list {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+    gap: 6px;
+    margin-top: 8px;
+  }
+  .name-list input {
+    width: 100%;
+    padding: 4px 8px;
+    font-size: 13px;
+  }
+  .toast {
+    position: fixed;
+    bottom: 20px;
+    left: 50%;
+    transform: translateX(-50%);
+    background: var(--color-text);
+    color: white;
+    padding: 10px 18px;
+    border-radius: 6px;
+    font-size: 13px;
+    z-index: 100;
+    opacity: 0;
+    transition: opacity 0.3s;
+    pointer-events: none;
+  }
+  .toast.show { opacity: 1; }
+</style>
+</head>
+<body>
+
+<h1>Physiotherapie Examen 2026 — Prüfungsplan Kohorte 13</h1>
+<p class="subtitle">KW 36 (31.08.–04.09.) und KW 37 (07.09.–11.09.2026) · Stand 13.05.2026</p>
+
+<div class="card">
+  <div class="controls">
+    <label>Wer bist du?
+      <select id="currentUser">
+        <option value="">— Name auswählen —</option>
+      </select>
+    </label>
+    <button id="exportBtn" class="secondary">📤 JSON exportieren</button>
+    <button id="importBtn" class="secondary">📥 JSON importieren</button>
+    <input type="file" id="importFile" accept="application/json" style="display:none">
+    <button id="shareBtn" class="secondary">🔗 Link mit aktuellem Stand kopieren</button>
+    <button id="resetBtn" class="danger">🗑️ Alles zurücksetzen</button>
+  </div>
+  <div class="legend">
+    <div class="legend-item"><div class="legend-swatch" style="background:var(--color-chi-ortho)"></div>Chi/Ortho</div>
+    <div class="legend-item"><div class="legend-swatch" style="background:var(--color-innere)"></div>Innere</div>
+    <div class="legend-item"><div class="legend-swatch" style="background:var(--color-neuro)"></div>Neuro</div>
+  </div>
+  <p class="help-text">
+    <strong>Regel:</strong> Jede Person trägt sich in <em>genau einen</em> Slot pro Woche ein — einmal Chi/Ortho und einmal Innere oder Neuro.
+    Es ist egal, in welcher Woche welches Fach liegt.
+  </p>
+</div>
+
+<details class="card">
+  <summary>👥 Personen verwalten (25 Plätze)</summary>
+  <p class="help-text">Trage hier die Namen der 25 Personen ein. Die Liste wird oben im Dropdown verwendet.</p>
+  <div id="nameList" class="name-list"></div>
+</details>
+
+<div class="weeks">
+  <div class="card">
+    <h2>KW 36 — 31.08. bis 04.09.2026</h2>
+    <table>
+      <thead>
+        <tr>
+          <th>#</th>
+          <th>Name</th>
+          <th>Einrichtung</th>
+          <th>Befund</th>
+          <th>Behandlung</th>
+          <th>Fach</th>
+          <th>Prüfende</th>
+        </tr>
+      </thead>
+      <tbody id="kw36-body"></tbody>
+    </table>
+  </div>
+
+  <div class="card">
+    <h2>KW 37 — 07.09. bis 11.09.2026</h2>
+    <table>
+      <thead>
+        <tr>
+          <th>#</th>
+          <th>Name</th>
+          <th>Einrichtung</th>
+          <th>Befund</th>
+          <th>Behandlung</th>
+          <th>Fach</th>
+          <th>Prüfende</th>
+        </tr>
+      </thead>
+      <tbody id="kw37-body"></tbody>
+    </table>
+  </div>
+</div>
+
+<div class="card">
+  <h2>📊 Auswertung</h2>
+  <div class="eval-grid">
+    <div class="eval-section">
+      <h3>Übersicht pro Person</h3>
+      <div id="evalPerson"></div>
+    </div>
+    <div class="eval-section">
+      <h3>Slot-Auslastung</h3>
+      <div id="evalStats"></div>
+    </div>
+    <div class="eval-section" id="conflictBox" style="display:none">
+      <h3>⚠️ Doppelt belegte Slots</h3>
+      <ul id="evalConflicts"></ul>
+    </div>
+    <div class="eval-section" id="errorBox" style="display:none">
+      <h3>❌ Fehlerhafte Eintragungen</h3>
+      <ul id="evalErrors"></ul>
+    </div>
+    <div class="eval-section" id="freeBox">
+      <h3>🆓 Freie Slots</h3>
+      <div id="evalFree"></div>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+// ============================================================
+// SLOT-DATEN — falls etwas nicht stimmt, hier korrigieren!
+// Fachrichtungen: "chi-ortho", "innere", "neuro"
+// ============================================================
+const SLOTS = {
+  kw36: [
+    { n: 1,  ein: "CTM (1)",            befund: "Mo 31.08. 09:30-10:00", beh: "31.08. 10:00-11:00", fach: "chi-ortho", pruef: "D. Kubasinski / H. Heitkamp" },
+    { n: 2,  ein: "CTM (2)",            befund: "Mo 31.08. 09:30-10:00", beh: "31.08. 10:30-11:30", fach: "chi-ortho", pruef: "D. Kubasinski / H. Heitkamp" },
+    { n: 3,  ein: "CTM (3)",            befund: "Mo 31.08. 11:00-11:30", beh: "31.08. 11:30-12:30", fach: "chi-ortho", pruef: "D. Kubasinski / H. Heitkamp" },
+    { n: 4,  ein: "CTM (4)",            befund: "Mo 31.08. 11:00-11:30", beh: "31.08. 12:00-13:00", fach: "chi-ortho", pruef: "D. Kubasinski / H. Heitkamp" },
+    { n: 5,  ein: "Medicos (1)",        befund: "Mo 31.08. 13:00-13:30", beh: "31.08. 14:00-15:00", fach: "chi-ortho", pruef: "H. Heitkamp / N. Fürmeyer" },
+    { n: 6,  ein: "Medicos (2)",        befund: "Mo 31.08. 13:00-13:30", beh: "31.08. 14:30-15:30", fach: "chi-ortho", pruef: "H. Heitkamp / N. Fürmeyer" },
+    { n: 7,  ein: "Medicos (3)",        befund: "Mo 31.08. 14:30-15:00", beh: "31.08. 15:30-16:30", fach: "chi-ortho", pruef: "H. Heitkamp / N. Fürmeyer" },
+    { n: 8,  ein: "Medicos (4)",        befund: "Mo 31.08. 14:30-15:00", beh: "31.08. 16:00-17:00", fach: "chi-ortho", pruef: "H. Heitkamp / N. Fürmeyer" },
+    { n: 9,  ein: "Medicos (5)",        befund: "Di 01.09. 09:00-09:30", beh: "01.09. 10:00-11:00", fach: "chi-ortho", pruef: "L. Knopf / P. Bröggemann" },
+    { n: 10, ein: "Medicos (6)",        befund: "Di 01.09. 09:00-09:30", beh: "01.09. 10:30-11:30", fach: "chi-ortho", pruef: "L. Knopf / P. Bröggemann" },
+    { n: 11, ein: "Medicos (7)",        befund: "Di 01.09. 11:30-12:00", beh: "01.09. 12:30-13:30", fach: "chi-ortho", pruef: "L. Knopf / P. Bröggemann" },
+    { n: 12, ein: "Medicos (8)",        befund: "Di 01.09. 11:30-12:00", beh: "01.09. 13:00-14:00", fach: "chi-ortho", pruef: "L. Knopf / P. Bröggemann" },
+    { n: 13, ein: "FNH (1)",            befund: "Do 03.09. 13:30-14:00", beh: "03.09. 14:00-15:00", fach: "innere",    pruef: "L. Knopf / P. Bröggemann" },
+    { n: 14, ein: "FNH (2)",            befund: "Do 03.09. 13:30-14:00", beh: "03.09. 14:30-15:30", fach: "innere",    pruef: "L. Knopf / P. Bröggemann" },
+    { n: 15, ein: "FNH (3)",            befund: "Do 03.09. 15:00-15:30", beh: "03.09. 15:30-16:30", fach: "innere",    pruef: "L. Knopf / P. Bröggemann" },
+    { n: 16, ein: "FNH (4)",            befund: "Do 03.09. 15:00-15:30", beh: "03.09. 16:00-17:00", fach: "innere",    pruef: "L. Knopf / P. Bröggemann" },
+    { n: 17, ein: "Klinikum (1)",       befund: "Mi 02.09. 11:00-11:30", beh: "02.09. 11:30-12:30", fach: "neuro",     pruef: "A. Hilgersom / L. Knopf" },
+    { n: 18, ein: "Klinikum (2)",       befund: "Mi 02.09. 11:00-11:30", beh: "02.09. 12:00-13:00", fach: "neuro",     pruef: "A. Hilgersom / L. Knopf" },
+    { n: 19, ein: "Klinikum (3)",       befund: "Mi 02.09. 13:00-13:30", beh: "02.09. 13:30-14:30", fach: "neuro",     pruef: "A. Hilgersom / L. Knopf" },
+    { n: 20, ein: "Klinikum (4)",       befund: "Mi 02.09. 13:00-13:30", beh: "02.09. 14:00-15:00", fach: "neuro",     pruef: "A. Hilgersom / L. Knopf" },
+    { n: 21, ein: "Medicos (9)",        befund: "Mo 31.08. 16:00-16:30", beh: "31.08. 17:00-18:00", fach: "innere",    pruef: "A. Hilgersom / L. Knopf" },
+    { n: 22, ein: "Medicos (10)",       befund: "Mo 31.08. 16:00-16:30", beh: "31.08. 17:30-18:30", fach: "innere",    pruef: "A. Hilgersom / L. Knopf" },
+    { n: 23, ein: "Schüchtermann (1)",  befund: "Fr 04.09. 11:30-12:00", beh: "04.09. 12:30-13:30", fach: "innere",    pruef: "L. Knopf / A. Hilgersom" },
+    { n: 24, ein: "Schüchtermann (2)",  befund: "Fr 04.09. 11:30-12:00", beh: "04.09. 13:00-14:00", fach: "innere",    pruef: "L. Knopf / A. Hilgersom" },
+    { n: 25, ein: "Schüchtermann (3)",  befund: "Fr 04.09. 13:30-14:00", beh: "04.09. 14:00-15:00", fach: "innere",    pruef: "L. Knopf / A. Hilgersom" },
+    { n: 26, ein: "Schüchtermann (4)",  befund: "Fr 04.09. 13:30-14:00", beh: "04.09. 14:30-15:30", fach: "innere",    pruef: "L. Knopf / A. Hilgersom" },
+  ],
+  kw37: [
+    { n: 1,  ein: "Döbl (1)",           befund: "Mo 07.09. 08:30-09:30", beh: "07.09. 09:00-10:00", fach: "chi-ortho", pruef: "H. Heitkamp / A. Wulfert" },
+    { n: 2,  ein: "Döbl (2)",           befund: "Mo 07.09. 08:30-09:30", beh: "07.09. 09:30-10:30", fach: "chi-ortho", pruef: "H. Heitkamp / A. Wulfert" },
+    { n: 3,  ein: "Döbl (3)",           befund: "Mo 07.09. 11:30-12:30", beh: "07.09. 12:30-13:30", fach: "chi-ortho", pruef: "H. Heitkamp / A. Wulfert" },
+    { n: 4,  ein: "Döbl (4)",           befund: "Mo 07.09. 11:30-12:30", beh: "07.09. 13:00-14:00", fach: "chi-ortho", pruef: "H. Heitkamp / A. Wulfert" },
+    { n: 5,  ein: "Döbl (5)",           befund: "Di 08.09. 08:30-09:30", beh: "08.09. 09:00-10:00", fach: "chi-ortho", pruef: "H. Heitkamp / A. Wulfert" },
+    { n: 6,  ein: "TC Vortrup (1)",     befund: "Di 08.09. 08:30-09:30", beh: "08.09. 11:00-12:00", fach: "chi-ortho", pruef: "L. Knopf / P. Bröggemann" },
+    { n: 7,  ein: "TC Vortrup (2)",     befund: "Di 08.09. 15:30-16:30", beh: "08.09. 16:00-17:00", fach: "chi-ortho", pruef: "L. Knopf / P. Bröggemann" },
+    { n: 8,  ein: "Inapo (1)",          befund: "Mi 09.09. 08:30-09:30", beh: "09.09. 09:00-10:00", fach: "chi-ortho", pruef: "H. Heitkamp / P. Bröggemann" },
+    { n: 9,  ein: "Inapo (2)",          befund: "Mi 09.09. 08:30-09:30", beh: "09.09. 09:30-10:30", fach: "chi-ortho", pruef: "H. Heitkamp / P. Bröggemann" },
+    { n: 10, ein: "Inapo (3)",          befund: "Mi 09.09. 11:30-12:30", beh: "09.09. 12:30-13:30", fach: "chi-ortho", pruef: "H. Heitkamp / P. Bröggemann" },
+    { n: 11, ein: "Klinikum (1)",       befund: "Mo 07.09. 13:30-14:30", beh: "07.09. 14:30-15:30", fach: "neuro",     pruef: "A. Hilgersom / L. Knopf" },
+    { n: 12, ein: "Klinikum (2)",       befund: "Mo 07.09. 13:30-14:30", beh: "07.09. 15:00-16:00", fach: "neuro",     pruef: "A. Hilgersom / L. Knopf" },
+    { n: 13, ein: "Klinikum (3)",       befund: "Di 08.09. 13:30-14:30", beh: "07.09. 14:30-15:30", fach: "neuro",     pruef: "A. Hilgersom / L. Knopf" },
+    { n: 14, ein: "Klinikum (4)",       befund: "Mi 09.09. 08:30-09:30", beh: "09.09. 09:00-10:00", fach: "neuro",     pruef: "A. Hilgersom / L. Knopf" },
+    { n: 15, ein: "Klinikum (5)",       befund: "Mi 09.09. 08:30-09:30", beh: "09.09. 09:30-10:30", fach: "neuro",     pruef: "A. Hilgersom / L. Knopf" },
+    { n: 16, ein: "Klinikum (6)",       befund: "Mi 09.09. 12:30-13:30", beh: "09.09. 13:00-14:00", fach: "neuro",     pruef: "A. Hilgersom / L. Knopf" },
+    { n: 17, ein: "Frei (1)",           befund: "Do 10.09. 08:30-09:30", beh: "10.09. 09:00-10:00", fach: "innere",    pruef: "L. Knopf / P. Bröggemann" },
+    { n: 18, ein: "Frei (2)",           befund: "Do 10.09. 08:30-09:30", beh: "10.09. 09:30-10:30", fach: "innere",    pruef: "L. Knopf / P. Bröggemann" },
+    { n: 19, ein: "Frei (3)",           befund: "Do 10.09. 11:30-12:30", beh: "10.09. 12:30-13:30", fach: "innere",    pruef: "L. Knopf / P. Bröggemann" },
+    { n: 20, ein: "Frei (4)",           befund: "Do 10.09. 11:30-12:30", beh: "10.09. 13:00-14:00", fach: "innere",    pruef: "L. Knopf / P. Bröggemann" },
+    { n: 21, ein: "Frei (5)",           befund: "Do 10.09. 13:30-14:30", beh: "10.09. 14:30-15:30", fach: "chi-ortho", pruef: "L. Knopf / P. Bröggemann" },
+    { n: 22, ein: "Schüchtermann (1)",  befund: "Fr 11.09. 11:00-12:00", beh: "11.09. 12:00-13:00", fach: "innere",    pruef: "L. Knopf / P. Bröggemann" },
+    { n: 23, ein: "Schüchtermann (2)",  befund: "Fr 11.09. 11:00-12:00", beh: "11.09. 12:30-13:30", fach: "innere",    pruef: "L. Knopf / P. Bröggemann" },
+    { n: 24, ein: "Schüchtermann (3)",  befund: "Fr 11.09. 12:30-13:30", beh: "11.09. 13:30-14:30", fach: "innere",    pruef: "L. Knopf / A. Hilgersom" },
+    { n: 25, ein: "Schüchtermann (4)",  befund: "Fr 11.09. 12:30-13:30", beh: "11.09. 14:00-15:00", fach: "innere",    pruef: "L. Knopf / A. Hilgersom" },
+    { n: 26, ein: "Schüchtermann (5)",  befund: "Fr 11.09. 13:30-14:30", beh: "11.09. 14:30-15:30", fach: "innere",    pruef: "L. Knopf / A. Hilgersom" },
+  ],
+};
+
+const FACH_LABELS = {
+  "chi-ortho": "Chi/Ortho",
+  "innere":    "Innere",
+  "neuro":     "Neuro",
+};
+
+// ============================================================
+// State
+// ============================================================
+const STORAGE_KEY = "pruefungsplan_v1";
+
+const defaultState = () => ({
+  names: Array.from({length: 25}, (_, i) => ""),
+  assignments: { kw36: {}, kw37: {} }, // { kw36: { 1: "Name", ... } }
+  currentUser: "",
+});
+
+let state = loadState();
+
+function loadState() {
+  // Try URL hash first
+  if (location.hash.startsWith("#data=")) {
+    try {
+      const decoded = decodeURIComponent(escape(atob(location.hash.slice(6))));
+      const s = JSON.parse(decoded);
+      saveState(s);
+      history.replaceState(null, "", location.pathname);
+      showToast("Stand aus Link geladen");
+      return mergeWithDefault(s);
+    } catch(e) { console.warn("Konnte URL-Stand nicht laden", e); }
+  }
+  try {
+    const raw = localStorage.getItem(STORAGE_KEY);
+    if (raw) return mergeWithDefault(JSON.parse(raw));
+  } catch(e) { console.warn(e); }
+  return defaultState();
+}
+
+function mergeWithDefault(s) {
+  const d = defaultState();
+  return {
+    names: (s.names && s.names.length === 25) ? s.names : d.names,
+    assignments: {
+      kw36: (s.assignments && s.assignments.kw36) || {},
+      kw37: (s.assignments && s.assignments.kw37) || {},
+    },
+    currentUser: s.currentUser || "",
+  };
+}
+
+function saveState(s = state) {
+  localStorage.setItem(STORAGE_KEY, JSON.stringify(s));
+}
+
+// ============================================================
+// Render
+// ============================================================
+function renderNameList() {
+  const container = document.getElementById("nameList");
+  container.innerHTML = "";
+  state.names.forEach((name, i) => {
+    const input = document.createElement("input");
+    input.type = "text";
+    input.placeholder = `Person ${i+1}`;
+    input.value = name;
+    input.addEventListener("input", (e) => {
+      const oldName = state.names[i];
+      const newName = e.target.value.trim();
+      // Update assignments if old name was used
+      if (oldName && oldName !== newName) {
+        for (const wk of ["kw36", "kw37"]) {
+          for (const [slot, n] of Object.entries(state.assignments[wk])) {
+            if (n === oldName) state.assignments[wk][slot] = newName;
+          }
+        }
+        if (state.currentUser === oldName) state.currentUser = newName;
+      }
+      state.names[i] = newName;
+      saveState();
+      renderUserSelect();
+      renderAll();
+    });
+    container.appendChild(input);
+  });
+}
+
+function renderUserSelect() {
+  const sel = document.getElementById("currentUser");
+  const prev = state.currentUser;
+  sel.innerHTML = '<option value="">— Name auswählen —</option>';
+  state.names.filter(n => n).forEach(n => {
+    const opt = document.createElement("option");
+    opt.value = n;
+    opt.textContent = n;
+    if (n === prev) opt.selected = true;
+    sel.appendChild(opt);
+  });
+}
+
+function renderWeek(weekKey, tbodyId) {
+  const tbody = document.getElementById(tbodyId);
+  tbody.innerHTML = "";
+  SLOTS[weekKey].forEach(slot => {
+    const assignedTo = state.assignments[weekKey][slot.n] || "";
+    const tr = document.createElement("tr");
+    tr.className = `fach-${slot.fach}`;
+
+    let nameCellClass = "slot-name";
+    if (!assignedTo) nameCellClass += " empty";
+    else if (assignedTo === state.currentUser) nameCellClass += " mine";
+
+    const claimableByMe = state.currentUser && (!assignedTo || assignedTo === state.currentUser);
+    const btnLabel = assignedTo === state.currentUser ? "✕ frei" : "+ ich";
+
+    tr.innerHTML = `
+      <td class="row-num">${slot.n}</td>
+      <td class="${nameCellClass}">${assignedTo || "frei"}${claimableByMe ? `<button class="claim-btn" data-week="${weekKey}" data-slot="${slot.n}">${btnLabel}</button>` : ""}</td>
+      <td>${slot.ein}</td>
+      <td>${slot.befund}</td>
+      <td>${slot.beh}</td>
+      <td><span class="badge ${slot.fach}">${FACH_LABELS[slot.fach]}</span></td>
+      <td>${slot.pruef}</td>
+    `;
+    tbody.appendChild(tr);
+  });
+
+  tbody.querySelectorAll(".claim-btn").forEach(btn => {
+    btn.addEventListener("click", () => {
+      const wk = btn.dataset.week;
+      const sl = btn.dataset.slot;
+      if (state.assignments[wk][sl] === state.currentUser) {
+        delete state.assignments[wk][sl];
+      } else {
+        state.assignments[wk][sl] = state.currentUser;
+      }
+      saveState();
+      renderAll();
+    });
+  });
+}
+
+function renderEvaluation() {
+  const personSummary = {};
+  state.names.filter(n => n).forEach(n => {
+    personSummary[n] = { kw36: [], kw37: [] };
+  });
+
+  for (const wk of ["kw36", "kw37"]) {
+    for (const [slotN, name] of Object.entries(state.assignments[wk])) {
+      if (!name) continue;
+      const slot = SLOTS[wk].find(s => s.n == slotN);
+      if (!slot) continue;
+      if (!personSummary[name]) personSummary[name] = { kw36: [], kw37: [] };
+      personSummary[name][wk].push({ slot: slot.n, fach: slot.fach, ein: slot.ein });
+    }
+  }
+
+  // Per Person
+  const evalPerson = document.getElementById("evalPerson");
+  evalPerson.innerHTML = "";
+  const errors = [];
+  const people = Object.keys(personSummary).sort();
+  if (people.length === 0) {
+    evalPerson.innerHTML = '<p class="help-text">Trage zuerst Namen ein.</p>';
+  } else {
+    people.forEach(name => {
+      const e36 = personSummary[name].kw36;
+      const e37 = personSummary[name].kw37;
+      const all = [...e36, ...e37];
+      const facher = all.map(a => a.fach);
+      const hasChiOrtho = facher.includes("chi-ortho");
+      const hasInnereOrNeuro = facher.includes("innere") || facher.includes("neuro");
+
+      let status = "";
+      let badge = "";
+
+      if (e36.length === 0 && e37.length === 0) {
+        status = "noch nichts eingetragen";
+        badge = '<span class="badge warn">offen</span>';
+      } else if (e36.length > 1 || e37.length > 1) {
+        status = `mehrere Slots in einer Woche (KW36: ${e36.length}, KW37: ${e37.length})`;
+        badge = '<span class="badge error">FEHLER</span>';
+        errors.push(`${name}: zu viele Slots in einer Woche`);
+      } else if (e36.length === 1 && e37.length === 1 && hasChiOrtho && hasInnereOrNeuro) {
+        status = `KW36: ${FACH_LABELS[e36[0].fach]} (Slot ${e36[0].slot}) · KW37: ${FACH_LABELS[e37[0].fach]} (Slot ${e37[0].slot})`;
+        badge = '<span class="badge ok">vollständig</span>';
+      } else if (e36.length + e37.length === 2 && (!hasChiOrtho || !hasInnereOrNeuro)) {
+        status = `falsche Kombination — gewählt: ${all.map(a => FACH_LABELS[a.fach]).join(" + ")}`;
+        badge = '<span class="badge error">FEHLER</span>';
+        errors.push(`${name}: braucht 1× Chi/Ortho UND 1× Innere oder Neuro`);
+      } else {
+        const have = [];
+        if (e36.length === 1) have.push(`KW36: ${FACH_LABELS[e36[0].fach]}`);
+        if (e37.length === 1) have.push(`KW37: ${FACH_LABELS[e37[0].fach]}`);
+        status = `unvollständig — bisher: ${have.join(" · ") || "nichts"}`;
+        badge = '<span class="badge warn">unvollständig</span>';
+      }
+
+      const row = document.createElement("div");
+      row.className = "stat-row";
+      row.innerHTML = `<span><strong>${name}</strong> ${badge}</span><span style="text-align:right">${status}</span>`;
+      evalPerson.appendChild(row);
+    });
+  }
+
+  // Stats per Fach
+  const evalStats = document.getElementById("evalStats");
+  evalStats.innerHTML = "";
+  const fachStats = { "chi-ortho": {total: 0, taken: 0}, "innere": {total: 0, taken: 0}, "neuro": {total: 0, taken: 0} };
+  for (const wk of ["kw36", "kw37"]) {
+    SLOTS[wk].forEach(slot => {
+      fachStats[slot.fach].total++;
+      if (state.assignments[wk][slot.n]) fachStats[slot.fach].taken++;
+    });
+  }
+  Object.entries(fachStats).forEach(([fach, st]) => {
+    const row = document.createElement("div");
+    row.className = "stat-row";
+    row.innerHTML = `<span><span class="badge ${fach}">${FACH_LABELS[fach]}</span></span><span><strong>${st.taken}</strong> / ${st.total} belegt</span>`;
+    evalStats.appendChild(row);
+  });
+  const totalSlots = fachStats["chi-ortho"].total + fachStats["innere"].total + fachStats["neuro"].total;
+  const totalTaken = fachStats["chi-ortho"].taken + fachStats["innere"].taken + fachStats["neuro"].taken;
+  const totalRow = document.createElement("div");
+  totalRow.className = "stat-row";
+  totalRow.innerHTML = `<span><strong>Gesamt</strong></span><span><strong>${totalTaken}</strong> / ${totalSlots} belegt</span>`;
+  evalStats.appendChild(totalRow);
+
+  // Conflicts (multiple names in same slot — sollte nicht passieren, aber sicherheitshalber)
+  // Real "conflict" hier: same person in multiple slots in same week
+  const conflicts = [];
+  for (const name of people) {
+    if (personSummary[name].kw36.length > 1) {
+      conflicts.push(`<strong>${name}</strong> hat ${personSummary[name].kw36.length} Slots in KW36: ${personSummary[name].kw36.map(a => `#${a.slot} ${a.ein}`).join(", ")}`);
+    }
+    if (personSummary[name].kw37.length > 1) {
+      conflicts.push(`<strong>${name}</strong> hat ${personSummary[name].kw37.length} Slots in KW37: ${personSummary[name].kw37.map(a => `#${a.slot} ${a.ein}`).join(", ")}`);
+    }
+  }
+  const conflictBox = document.getElementById("conflictBox");
+  const evalConflicts = document.getElementById("evalConflicts");
+  if (conflicts.length > 0) {
+    conflictBox.style.display = "";
+    evalConflicts.innerHTML = conflicts.map(c => `<li>${c}</li>`).join("");
+  } else {
+    conflictBox.style.display = "none";
+  }
+
+  // Errors
+  const errorBox = document.getElementById("errorBox");
+  const evalErrors = document.getElementById("evalErrors");
+  if (errors.length > 0) {
+    errorBox.style.display = "";
+    evalErrors.innerHTML = errors.map(e => `<li>${e}</li>`).join("");
+  } else {
+    errorBox.style.display = "none";
+  }
+
+  // Free slots
+  const evalFree = document.getElementById("evalFree");
+  evalFree.innerHTML = "";
+  for (const wk of ["kw36", "kw37"]) {
+    const free = SLOTS[wk].filter(s => !state.assignments[wk][s.n]);
+    const row = document.createElement("div");
+    row.className = "stat-row";
+    const label = wk === "kw36" ? "KW 36" : "KW 37";
+    row.innerHTML = `<span><strong>${label}</strong></span><span>${free.length} frei: ${free.map(s => `#${s.n}`).join(", ") || "—"}</span>`;
+    evalFree.appendChild(row);
+  }
+}
+
+function renderAll() {
+  renderWeek("kw36", "kw36-body");
+  renderWeek("kw37", "kw37-body");
+  renderEvaluation();
+}
+
+// ============================================================
+// Events
+// ============================================================
+document.getElementById("currentUser").addEventListener("change", (e) => {
+  state.currentUser = e.target.value;
+  saveState();
+  renderAll();
+});
+
+document.getElementById("exportBtn").addEventListener("click", () => {
+  const blob = new Blob([JSON.stringify(state, null, 2)], { type: "application/json" });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  const ts = new Date().toISOString().slice(0, 16).replace(/[:T]/g, "-");
+  a.href = url;
+  a.download = `pruefungsplan-${ts}.json`;
+  a.click();
+  URL.revokeObjectURL(url);
+  showToast("JSON heruntergeladen");
+});
+
+document.getElementById("importBtn").addEventListener("click", () => {
+  document.getElementById("importFile").click();
+});
+
+document.getElementById("importFile").addEventListener("change", (e) => {
+  const file = e.target.files[0];
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = (ev) => {
+    try {
+      const imported = JSON.parse(ev.target.result);
+      state = mergeWithDefault(imported);
+      saveState();
+      renderNameList();
+      renderUserSelect();
+      renderAll();
+      showToast("Stand importiert");
+    } catch(err) {
+      alert("Fehler beim Importieren: " + err.message);
+    }
+  };
+  reader.readAsText(file);
+  e.target.value = "";
+});
+
+document.getElementById("shareBtn").addEventListener("click", async () => {
+  const json = JSON.stringify(state);
+  const encoded = btoa(unescape(encodeURIComponent(json)));
+  const url = `${location.origin}${location.pathname}#data=${encoded}`;
+  try {
+    await navigator.clipboard.writeText(url);
+    showToast("Link in Zwischenablage kopiert (" + url.length + " Zeichen)");
+  } catch {
+    prompt("Link kopieren:", url);
+  }
+});
+
+document.getElementById("resetBtn").addEventListener("click", () => {
+  if (confirm("Wirklich alle Eintragungen UND Namen löschen?")) {
+    state = defaultState();
+    saveState();
+    renderNameList();
+    renderUserSelect();
+    renderAll();
+    showToast("Zurückgesetzt");
+  }
+});
+
+function showToast(msg) {
+  const t = document.getElementById("toast");
+  t.textContent = msg;
+  t.classList.add("show");
+  setTimeout(() => t.classList.remove("show"), 2200);
+}
+
+// ============================================================
+// Init
+// ============================================================
+renderNameList();
+renderUserSelect();
+renderAll();
+</script>
+
+</body>
+</html>
