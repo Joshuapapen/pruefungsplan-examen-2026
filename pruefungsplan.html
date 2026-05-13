@@ -255,10 +255,8 @@
 
 <div class="card">
   <div class="controls">
-    <label>Wer bist du?
-      <select id="currentUser">
-        <option value="">— Name auswählen —</option>
-      </select>
+    <label>Dein Name
+      <input type="text" id="currentUser" placeholder="z.B. Max Mustermann" autocomplete="name" style="min-width: 220px;">
     </label>
     <button id="exportBtn" class="secondary">📤 JSON exportieren</button>
     <button id="importBtn" class="secondary">📥 JSON importieren</button>
@@ -273,15 +271,9 @@
   </div>
   <p class="help-text">
     <strong>Regel:</strong> Jede Person trägt sich in <em>genau einen</em> Slot pro Woche ein — einmal Chi/Ortho und einmal Innere oder Neuro.
-    Es ist egal, in welcher Woche welches Fach liegt.
+    Es ist egal, in welcher Woche welches Fach liegt. Es sollten insgesamt 25 Personen sein.
   </p>
 </div>
-
-<details class="card">
-  <summary>👥 Personen verwalten (25 Plätze)</summary>
-  <p class="help-text">Trage hier die Namen der 25 Personen ein. Die Liste wird oben im Dropdown verwendet.</p>
-  <div id="nameList" class="name-list"></div>
-</details>
 
 <div class="weeks">
   <div class="card">
@@ -425,7 +417,6 @@ const FACH_LABELS = {
 const STORAGE_KEY = "pruefungsplan_v1";
 
 const defaultState = () => ({
-  names: Array.from({length: 25}, (_, i) => ""),
   assignments: { kw36: {}, kw37: {} }, // { kw36: { 1: "Name", ... } }
   currentUser: "",
 });
@@ -452,15 +443,23 @@ function loadState() {
 }
 
 function mergeWithDefault(s) {
-  const d = defaultState();
   return {
-    names: (s.names && s.names.length === 25) ? s.names : d.names,
     assignments: {
       kw36: (s.assignments && s.assignments.kw36) || {},
       kw37: (s.assignments && s.assignments.kw37) || {},
     },
     currentUser: s.currentUser || "",
   };
+}
+
+function getAllPeople() {
+  const set = new Set();
+  for (const wk of ["kw36", "kw37"]) {
+    for (const name of Object.values(state.assignments[wk])) {
+      if (name && name.trim()) set.add(name.trim());
+    }
+  }
+  return [...set].sort((a, b) => a.localeCompare(b, "de"));
 }
 
 function saveState(s = state) {
@@ -470,45 +469,13 @@ function saveState(s = state) {
 // ============================================================
 // Render
 // ============================================================
-function renderNameList() {
-  const container = document.getElementById("nameList");
-  container.innerHTML = "";
-  state.names.forEach((name, i) => {
-    const input = document.createElement("input");
-    input.type = "text";
-    input.placeholder = `Person ${i+1}`;
-    input.value = name;
-    input.addEventListener("input", (e) => {
-      const oldName = state.names[i];
-      const newName = e.target.value.trim();
-      // Update assignments if old name was used
-      if (oldName && oldName !== newName) {
-        for (const wk of ["kw36", "kw37"]) {
-          for (const [slot, n] of Object.entries(state.assignments[wk])) {
-            if (n === oldName) state.assignments[wk][slot] = newName;
-          }
-        }
-        if (state.currentUser === oldName) state.currentUser = newName;
-      }
-      state.names[i] = newName;
-      saveState();
-      renderUserSelect();
-      renderAll();
-    });
-    container.appendChild(input);
-  });
-}
-
-function renderUserSelect() {
-  const sel = document.getElementById("currentUser");
-  const prev = state.currentUser;
-  sel.innerHTML = '<option value="">— Name auswählen —</option>';
-  state.names.filter(n => n).forEach(n => {
-    const opt = document.createElement("option");
-    opt.value = n;
-    opt.textContent = n;
-    if (n === prev) opt.selected = true;
-    sel.appendChild(opt);
+function initUserInput() {
+  const input = document.getElementById("currentUser");
+  input.value = state.currentUser || "";
+  input.addEventListener("input", (e) => {
+    state.currentUser = e.target.value.trim();
+    saveState();
+    renderAll();
   });
 }
 
@@ -556,9 +523,6 @@ function renderWeek(weekKey, tbodyId) {
 
 function renderEvaluation() {
   const personSummary = {};
-  state.names.filter(n => n).forEach(n => {
-    personSummary[n] = { kw36: [], kw37: [] };
-  });
 
   for (const wk of ["kw36", "kw37"]) {
     for (const [slotN, name] of Object.entries(state.assignments[wk])) {
@@ -574,9 +538,23 @@ function renderEvaluation() {
   const evalPerson = document.getElementById("evalPerson");
   evalPerson.innerHTML = "";
   const errors = [];
-  const people = Object.keys(personSummary).sort();
+  const people = Object.keys(personSummary).sort((a, b) => a.localeCompare(b, "de"));
+
+  // Header: count of people
+  const countRow = document.createElement("div");
+  countRow.className = "stat-row";
+  let countBadge = '';
+  if (people.length === 25) countBadge = '<span class="badge ok">25 / 25</span>';
+  else if (people.length > 25) countBadge = `<span class="badge error">${people.length} / 25 (zu viele!)</span>`;
+  else countBadge = `<span class="badge warn">${people.length} / 25</span>`;
+  countRow.innerHTML = `<span><strong>Personen eingetragen</strong></span><span>${countBadge}</span>`;
+  evalPerson.appendChild(countRow);
+
   if (people.length === 0) {
-    evalPerson.innerHTML = '<p class="help-text">Trage zuerst Namen ein.</p>';
+    const hint = document.createElement("p");
+    hint.className = "help-text";
+    hint.textContent = "Noch niemand eingetragen.";
+    evalPerson.appendChild(hint);
   } else {
     people.forEach(name => {
       const e36 = personSummary[name].kw36;
@@ -693,12 +671,6 @@ function renderAll() {
 // ============================================================
 // Events
 // ============================================================
-document.getElementById("currentUser").addEventListener("change", (e) => {
-  state.currentUser = e.target.value;
-  saveState();
-  renderAll();
-});
-
 document.getElementById("exportBtn").addEventListener("click", () => {
   const blob = new Blob([JSON.stringify(state, null, 2)], { type: "application/json" });
   const url = URL.createObjectURL(blob);
@@ -724,8 +696,7 @@ document.getElementById("importFile").addEventListener("change", (e) => {
       const imported = JSON.parse(ev.target.result);
       state = mergeWithDefault(imported);
       saveState();
-      renderNameList();
-      renderUserSelect();
+      document.getElementById("currentUser").value = state.currentUser || "";
       renderAll();
       showToast("Stand importiert");
     } catch(err) {
@@ -749,11 +720,10 @@ document.getElementById("shareBtn").addEventListener("click", async () => {
 });
 
 document.getElementById("resetBtn").addEventListener("click", () => {
-  if (confirm("Wirklich alle Eintragungen UND Namen löschen?")) {
+  if (confirm("Wirklich ALLE Eintragungen löschen? Das betrifft alle 25 Personen.")) {
     state = defaultState();
     saveState();
-    renderNameList();
-    renderUserSelect();
+    document.getElementById("currentUser").value = "";
     renderAll();
     showToast("Zurückgesetzt");
   }
@@ -769,8 +739,7 @@ function showToast(msg) {
 // ============================================================
 // Init
 // ============================================================
-renderNameList();
-renderUserSelect();
+initUserInput();
 renderAll();
 </script>
 
