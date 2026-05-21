@@ -333,9 +333,9 @@
     <div class="legend-item"><div class="legend-swatch" style="background:var(--color-neuro)"></div>Neuro</div>
   </div>
   <p class="help-text">
-    <strong>Regel:</strong> Jede Person trägt einen <strong style="color:#2563eb">Erstwunsch (1. Wahl)</strong> in jeder Woche ein — einmal Chi/Ortho und einmal Innere oder Neuro.
-    Zusätzlich kann optional ein <em style="color:#64748b">Zweitwunsch (2. Wahl)</em> als Backup angegeben werden, falls der Erstwunsch belegt ist.
-    Es ist egal, in welcher Woche welches Fach liegt. Es sollten insgesamt 25 Personen sein.
+    <strong>Regel:</strong> Jede Person trägt <strong style="color:#2563eb">1. Wahl</strong>, <em style="color:#475569">2. Wahl</em> und <em style="color:#94a3b8">3. Wahl</em> ein.
+    Für jede Wunschstufe gilt: in jeder Woche genau einen Slot — einmal Chi/Ortho und einmal Innere oder Neuro (egal in welcher Woche welches Fach liegt).
+    Es sollten insgesamt 25 Personen sein.
   </p>
 </div>
 
@@ -437,60 +437,60 @@ const fbRoot = ref(fbDb, "pruefungsplan");
 // ============================================================
 const SLOTS = {
   kw36: [
-    { n: 1,  ein: "CTM (1)",            befund: "Mo 31.08. 09:30-10:00", beh: "31.08. 10:00-11:00", fach: "chi-ortho", pruef: "D. Kubasinski / H. Heitkamp" },
-    { n: 2,  ein: "CTM (2)",            befund: "Mo 31.08. 09:30-10:00", beh: "31.08. 10:30-11:30", fach: "chi-ortho", pruef: "D. Kubasinski / H. Heitkamp" },
-    { n: 3,  ein: "CTM (3)",            befund: "Mo 31.08. 11:00-11:30", beh: "31.08. 11:30-12:30", fach: "chi-ortho", pruef: "D. Kubasinski / H. Heitkamp" },
-    { n: 4,  ein: "CTM (4)",            befund: "Mo 31.08. 11:00-11:30", beh: "31.08. 12:00-13:00", fach: "chi-ortho", pruef: "D. Kubasinski / H. Heitkamp" },
-    { n: 5,  ein: "Medicos (1)",        befund: "Mo 31.08. 13:00-13:30", beh: "31.08. 14:00-15:00", fach: "chi-ortho", pruef: "H. Heitkamp / N. Fürmeyer" },
-    { n: 6,  ein: "Medicos (2)",        befund: "Mo 31.08. 13:00-13:30", beh: "31.08. 14:30-15:30", fach: "chi-ortho", pruef: "H. Heitkamp / N. Fürmeyer" },
-    { n: 7,  ein: "Medicos (3)",        befund: "Mo 31.08. 14:30-15:00", beh: "31.08. 15:30-16:30", fach: "chi-ortho", pruef: "H. Heitkamp / N. Fürmeyer" },
-    { n: 8,  ein: "Medicos (4)",        befund: "Mo 31.08. 14:30-15:00", beh: "31.08. 16:00-17:00", fach: "chi-ortho", pruef: "H. Heitkamp / N. Fürmeyer" },
-    { n: 9,  ein: "Medicos (5)",        befund: "Di 01.09. 09:00-09:30", beh: "01.09. 10:00-11:00", fach: "chi-ortho", pruef: "L. Knopf / P. Bröggemann" },
-    { n: 10, ein: "Medicos (6)",        befund: "Di 01.09. 09:00-09:30", beh: "01.09. 10:30-11:30", fach: "chi-ortho", pruef: "L. Knopf / P. Bröggemann" },
-    { n: 11, ein: "Medicos (7)",        befund: "Di 01.09. 11:30-12:00", beh: "01.09. 12:30-13:30", fach: "chi-ortho", pruef: "L. Knopf / P. Bröggemann" },
-    { n: 12, ein: "Medicos (8)",        befund: "Di 01.09. 11:30-12:00", beh: "01.09. 13:00-14:00", fach: "chi-ortho", pruef: "L. Knopf / P. Bröggemann" },
-    { n: 13, ein: "FHH (1)",            befund: "Do 03.09. 13:30-14:00", beh: "03.09. 14:00-15:00", fach: "innere",    pruef: "L. Knopf / P. Bröggemann" },
-    { n: 14, ein: "FHH (2)",            befund: "Do 03.09. 13:30-14:00", beh: "03.09. 14:30-15:30", fach: "innere",    pruef: "L. Knopf / P. Bröggemann" },
-    { n: 15, ein: "FHH (3)",            befund: "Do 03.09. 15:00-15:30", beh: "03.09. 15:30-16:30", fach: "innere",    pruef: "L. Knopf / P. Bröggemann" },
-    { n: 16, ein: "FHH (4)",            befund: "Do 03.09. 15:00-15:30", beh: "03.09. 16:00-17:00", fach: "innere",    pruef: "L. Knopf / P. Bröggemann" },
-    { n: 17, ein: "Klinikum (1)",       befund: "Mi 02.09. 11:00-11:30", beh: "02.09. 11:30-12:30", fach: "neuro",     pruef: "A. Hilgersom / L. Knopf" },
-    { n: 18, ein: "Klinikum (2)",       befund: "Mi 02.09. 11:00-11:30", beh: "02.09. 12:00-13:00", fach: "neuro",     pruef: "A. Hilgersom / L. Knopf" },
-    { n: 19, ein: "Klinikum (3)",       befund: "Mi 02.09. 13:00-13:30", beh: "02.09. 13:30-14:30", fach: "neuro",     pruef: "A. Hilgersom / L. Knopf" },
-    { n: 20, ein: "Klinikum (4)",       befund: "Mi 02.09. 13:00-13:30", beh: "02.09. 14:00-15:00", fach: "neuro",     pruef: "A. Hilgersom / L. Knopf" },
-    { n: 21, ein: "Medicos (9)",        befund: "Mo 31.08. 16:00-16:30", beh: "31.08. 17:00-18:00", fach: "innere",    pruef: "A. Hilgersom / L. Knopf" },
-    { n: 22, ein: "Medicos (10)",       befund: "Mo 31.08. 16:00-16:30", beh: "31.08. 17:30-18:30", fach: "innere",    pruef: "A. Hilgersom / L. Knopf" },
-    { n: 23, ein: "Schüchtermann (1)",  befund: "Fr 04.09. 11:30-12:00", beh: "04.09. 12:30-13:30", fach: "innere",    pruef: "L. Knopf / A. Hilgersom" },
-    { n: 24, ein: "Schüchtermann (2)",  befund: "Fr 04.09. 11:30-12:00", beh: "04.09. 13:00-14:00", fach: "innere",    pruef: "L. Knopf / A. Hilgersom" },
-    { n: 25, ein: "Schüchtermann (3)",  befund: "Fr 04.09. 13:30-14:00", beh: "04.09. 14:00-15:00", fach: "innere",    pruef: "L. Knopf / A. Hilgersom" },
-    { n: 26, ein: "Schüchtermann (4)",  befund: "Fr 04.09. 13:30-14:00", beh: "04.09. 14:30-15:30", fach: "innere",    pruef: "L. Knopf / A. Hilgersom" },
+    { n: 1,  ein: "CTM (1)",            befund: "Mo 31.08. 08:00 - 09:00", beh: "31.08. 09:00 - 09:30", fach: "chi-ortho", pruef: "D. Kubasinski / H. Heitkamp" },
+    { n: 2,  ein: "CTM (2)",            befund: "Mo 31.08. 09:30 - 10:30", beh: "31.08. 10:30 - 11:30", fach: "chi-ortho", pruef: "D. Kubasinski / H. Heitkamp" },
+    { n: 3,  ein: "CTM (3)",            befund: "Mo 31.08. 11:00 - 12:00", beh: "31.08. 12:00 - 12:30", fach: "chi-ortho", pruef: "D. Kubasinski / H. Heitkamp" },
+    { n: 4,  ein: "CTM (4)",            befund: "Mo 31.08. 13:00 - 14:00", beh: "31.08. 14:00 - 14:30", fach: "chi-ortho", pruef: "D. Kubasinski / H. Heitkamp" },
+    { n: 5,  ein: "CTM (5)",            befund: "Mo 31.08. 14:30 - 15:30", beh: "31.08. 15:30 - 16:00", fach: "chi-ortho", pruef: "D. Kubasinski / H. Heitkamp" },
+    { n: 6,  ein: "Medicos (1)",        befund: "Di 01.09. 08:30 - 09:30", beh: "01.09. 09:30 - 10:00", fach: "chi-ortho", pruef: "H. Heitkamp / U. Fürmeyer" },
+    { n: 7,  ein: "Medicos (2)",        befund: "Di 01.09. 10:00 - 11:00", beh: "01.09. 11:00 - 11:30", fach: "chi-ortho", pruef: "H. Heitkamp / U. Fürmeyer" },
+    { n: 8,  ein: "Medicos (3)",        befund: "Di 01.09. 11:30 - 12:30", beh: "01.09. 12:30 - 13:00", fach: "chi-ortho", pruef: "H. Heitkamp / U. Fürmeyer" },
+    { n: 9,  ein: "Medicos (4)",        befund: "Di 01.09. 13:30 - 14:30", beh: "01.09. 14:30 - 15:00", fach: "chi-ortho", pruef: "H. Heitkamp / U. Fürmeyer" },
+    { n: 10, ein: "Medicos (5)",        befund: "Di 01.09. 15:00 - 16:00", beh: "01.09. 16:00 - 16:30", fach: "chi-ortho", pruef: "H. Heitkamp / U. Fürmeyer" },
+    { n: 11, ein: "FHH (1)",            befund: "Do 03.09. 08:30 - 09:30", beh: "03.09. 09:30 - 10:00", fach: "chi-ortho", pruef: "L. Knopf / P. Böggemann" },
+    { n: 12, ein: "FHH (2)",            befund: "Do 03.09. 10:00 - 11:00", beh: "03.09. 11:00 - 11:30", fach: "chi-ortho", pruef: "L. Knopf / P. Böggemann" },
+    { n: 13, ein: "FHH (3)",            befund: "Do 03.09. 11:30 - 12:30", beh: "03.09. 12:30 - 13:00", fach: "chi-ortho", pruef: "L. Knopf / P. Böggemann" },
+    { n: 14, ein: "FHH (1)",            befund: "Do 03.09. 13:30 - 14:30", beh: "03.09. 14:30 - 15:00", fach: "innere",    pruef: "L. Knopf / P. Böggemann" },
+    { n: 15, ein: "FHH (2)",            befund: "Do 03.09. 15:00 - 16:00", beh: "03.09. 16:00 - 16:30", fach: "innere",    pruef: "L. Knopf / P. Böggemann" },
+    { n: 16, ein: "Klinikum (1)",       befund: "Mi 02.09. 08:30 - 09:30", beh: "02.09. 09:30 - 10:00", fach: "neuro",     pruef: "A. Hilgersom / L. Knopf" },
+    { n: 17, ein: "Klinikum (2)",       befund: "Mi 02.09. 10:00 - 11:00", beh: "02.09. 11:00 - 11:30", fach: "neuro",     pruef: "A. Hilgersom / L. Knopf" },
+    { n: 18, ein: "Klinikum (3)",       befund: "Mi 02.09. 11:30 - 12:30", beh: "02.09. 12:30 - 13:00", fach: "neuro",     pruef: "A. Hilgersom / L. Knopf" },
+    { n: 19, ein: "Klinikum (4)",       befund: "Mi 02.09. 13:30 - 14:30", beh: "02.09. 14:30 - 15:00", fach: "neuro",     pruef: "A. Hilgersom / L. Knopf" },
+    { n: 20, ein: "Medicos (1)",        befund: "Mo 31.08. 13:00 - 14:00", beh: "31.08. 14:00 - 14:30", fach: "neuro",     pruef: "A. Hilgersom / L. Knopf" },
+    { n: 21, ein: "Medicos (2)",        befund: "Mo 31.08. 14:30 - 15:30", beh: "31.08. 15:30 - 16:00", fach: "neuro",     pruef: "A. Hilgersom / L. Knopf" },
+    { n: 22, ein: "Medicos (3)",        befund: "Mo 31.08. 16:00 - 17:00", beh: "31.08. 17:00 - 17:30", fach: "neuro",     pruef: "A. Hilgersom / L. Knopf" },
+    { n: 23, ein: "Schüchtermann (1)",  befund: "Fr 04.09. 08:30 - 09:30", beh: "04.09. 09:30 - 10:00", fach: "innere",    pruef: "L. Knopf / A. Hilgersom" },
+    { n: 24, ein: "Schüchtermann (2)",  befund: "Fr 04.09. 10:00 - 11:00", beh: "04.09. 11:00 - 11:30", fach: "innere",    pruef: "L. Knopf / A. Hilgersom" },
+    { n: 25, ein: "Schüchtermann (3)",  befund: "Fr 04.09. 11:30 - 12:30", beh: "04.09. 12:30 - 13:00", fach: "innere",    pruef: "L. Knopf / A. Hilgersom" },
+    { n: 26, ein: "Schüchtermann (4)",  befund: "Fr 04.09. 13:30 - 14:30", beh: "04.09. 14:30 - 15:00", fach: "innere",    pruef: "L. Knopf / A. Hilgersom" },
   ],
   kw37: [
-    { n: 1,  ein: "Dökli (1)",           befund: "Mo 07.09. 08:30-09:30", beh: "07.09. 09:00-10:00", fach: "chi-ortho", pruef: "H. Heitkamp / A. Wulfert" },
-    { n: 2,  ein: "Dökli (2)",           befund: "Mo 07.09. 08:30-09:30", beh: "07.09. 09:30-10:30", fach: "chi-ortho", pruef: "H. Heitkamp / A. Wulfert" },
-    { n: 3,  ein: "Dökli (3)",           befund: "Mo 07.09. 11:30-12:30", beh: "07.09. 12:30-13:30", fach: "chi-ortho", pruef: "H. Heitkamp / A. Wulfert" },
-    { n: 4,  ein: "Dökli (4)",           befund: "Mo 07.09. 11:30-12:30", beh: "07.09. 13:00-14:00", fach: "chi-ortho", pruef: "H. Heitkamp / A. Wulfert" },
-    { n: 5,  ein: "Dökli (5)",           befund: "Di 08.09. 08:30-09:30", beh: "08.09. 09:00-10:00", fach: "chi-ortho", pruef: "H. Heitkamp / A. Wulfert" },
-    { n: 6,  ein: "TC Vortrup (1)",     befund: "Di 08.09. 08:30-09:30", beh: "08.09. 11:00-12:00", fach: "chi-ortho", pruef: "L. Knopf / P. Bröggemann" },
-    { n: 7,  ein: "TC Vortrup (2)",     befund: "Di 08.09. 15:30-16:30", beh: "08.09. 16:00-17:00", fach: "chi-ortho", pruef: "L. Knopf / P. Bröggemann" },
-    { n: 8,  ein: "Inapo (1)",          befund: "Mi 09.09. 08:30-09:30", beh: "09.09. 09:00-10:00", fach: "chi-ortho", pruef: "H. Heitkamp / P. Bröggemann" },
-    { n: 9,  ein: "Inapo (2)",          befund: "Mi 09.09. 08:30-09:30", beh: "09.09. 09:30-10:30", fach: "chi-ortho", pruef: "H. Heitkamp / P. Bröggemann" },
-    { n: 10, ein: "Inapo (3)",          befund: "Mi 09.09. 11:30-12:30", beh: "09.09. 12:30-13:30", fach: "chi-ortho", pruef: "H. Heitkamp / P. Bröggemann" },
-    { n: 11, ein: "Klinikum (1)",       befund: "Mo 07.09. 13:30-14:30", beh: "07.09. 14:30-15:30", fach: "neuro",     pruef: "A. Hilgersom / L. Knopf" },
-    { n: 12, ein: "Klinikum (2)",       befund: "Mo 07.09. 13:30-14:30", beh: "07.09. 15:00-16:00", fach: "neuro",     pruef: "A. Hilgersom / L. Knopf" },
-    { n: 13, ein: "Klinikum (3)",       befund: "Di 08.09. 13:30-14:30", beh: "07.09. 14:30-15:30", fach: "neuro",     pruef: "A. Hilgersom / L. Knopf" },
-    { n: 14, ein: "Klinikum (4)",       befund: "Mi 09.09. 08:30-09:30", beh: "09.09. 09:00-10:00", fach: "neuro",     pruef: "A. Hilgersom / L. Knopf" },
-    { n: 15, ein: "Klinikum (5)",       befund: "Mi 09.09. 08:30-09:30", beh: "09.09. 09:30-10:30", fach: "neuro",     pruef: "A. Hilgersom / L. Knopf" },
-    { n: 16, ein: "Klinikum (6)",       befund: "Mi 09.09. 12:30-13:30", beh: "09.09. 13:00-14:00", fach: "neuro",     pruef: "A. Hilgersom / L. Knopf" },
-    { n: 17, ein: "FHH (1)",           befund: "Do 10.09. 08:30-09:30", beh: "10.09. 09:00-10:00", fach: "innere",    pruef: "L. Knopf / P. Bröggemann" },
-    { n: 18, ein: "FHH (2)",           befund: "Do 10.09. 08:30-09:30", beh: "10.09. 09:30-10:30", fach: "innere",    pruef: "L. Knopf / P. Bröggemann" },
-    { n: 19, ein: "FHH (3)",           befund: "Do 10.09. 11:30-12:30", beh: "10.09. 12:30-13:30", fach: "innere",    pruef: "L. Knopf / P. Bröggemann" },
-    { n: 20, ein: "FHH (4)",           befund: "Do 10.09. 11:30-12:30", beh: "10.09. 13:00-14:00", fach: "innere",    pruef: "L. Knopf / P. Bröggemann" },
-    { n: 21, ein: "FHH (5)",           befund: "Do 10.09. 13:30-14:30", beh: "10.09. 14:30-15:30", fach: "chi-ortho", pruef: "L. Knopf / P. Bröggemann" },
-    { n: 22, ein: "Schüchtermann (1)",  befund: "Fr 11.09. 11:00-12:00", beh: "11.09. 12:00-13:00", fach: "innere",    pruef: "L. Knopf / P. Bröggemann" },
-    { n: 23, ein: "Schüchtermann (2)",  befund: "Fr 11.09. 11:00-12:00", beh: "11.09. 12:30-13:30", fach: "innere",    pruef: "L. Knopf / P. Bröggemann" },
-    { n: 24, ein: "Schüchtermann (3)",  befund: "Fr 11.09. 12:30-13:30", beh: "11.09. 13:30-14:30", fach: "innere",    pruef: "L. Knopf / A. Hilgersom" },
-    { n: 25, ein: "Schüchtermann (4)",  befund: "Fr 11.09. 12:30-13:30", beh: "11.09. 14:00-15:00", fach: "innere",    pruef: "L. Knopf / A. Hilgersom" },
-    { n: 26, ein: "Schüchtermann (5)",  befund: "Fr 11.09. 13:30-14:30", beh: "11.09. 14:30-15:30", fach: "innere",    pruef: "L. Knopf / A. Hilgersom" },
+    { n: 1,  ein: "Dökli (1)",          befund: "Mo 07.09. 08:30 - 09:30", beh: "07.09. 09:30 - 10:00", fach: "chi-ortho", pruef: "H. Heitkamp / A. Wulfert" },
+    { n: 2,  ein: "Dökli (2)",          befund: "Mo 07.09. 10:00 - 11:00", beh: "07.09. 11:00 - 11:30", fach: "chi-ortho", pruef: "H. Heitkamp / A. Wulfert" },
+    { n: 3,  ein: "Dökli (3)",          befund: "Mo 07.09. 11:30 - 12:30", beh: "07.09. 12:30 - 13:00", fach: "chi-ortho", pruef: "H. Heitkamp / A. Wulfert" },
+    { n: 4,  ein: "Dökli (4)",          befund: "Di 08.09. 08:30 - 09:30", beh: "08.09. 09:30 - 10:00", fach: "chi-ortho", pruef: "H. Heitkamp / A. Wulfert" },
+    { n: 5,  ein: "Dökli (5)",          befund: "Di 08.09. 10:00 - 11:00", beh: "08.09. 11:00 - 11:30", fach: "chi-ortho", pruef: "H. Heitkamp / A. Wulfert" },
+    { n: 6,  ein: "Dökli (6)",          befund: "Di 08.09. 11:30 - 12:30", beh: "08.09. 12:30 - 13:00", fach: "chi-ortho", pruef: "H. Heitkamp / A. Wulfert" },
+    { n: 7,  ein: "TC Voxtrup (1)",     befund: "Di 08.09. 14:00 - 15:00", beh: "08.09. 15:00 - 15:30", fach: "chi-ortho", pruef: "L. Knopf / P. Böggemann" },
+    { n: 8,  ein: "TC Voxtrup (2)",     befund: "Di 08.09. 15:30 - 16:30", beh: "08.09. 16:30 - 17:00", fach: "chi-ortho", pruef: "L. Knopf / P. Böggemann" },
+    { n: 9,  ein: "Inapo (1)",          befund: "Mi 09.09. 08:30 - 09:30", beh: "09.09. 09:30 - 10:00", fach: "chi-ortho", pruef: "H. Heitkamp / P. Böggemann" },
+    { n: 10, ein: "Inapo (2)",          befund: "Mi 09.09. 10:00 - 11:00", beh: "09.09. 11:00 - 11:30", fach: "chi-ortho", pruef: "H. Heitkamp / P. Böggemann" },
+    { n: 11, ein: "Inapo (3)",          befund: "Mi 09.09. 11:30 - 12:30", beh: "09.09. 12:30 - 13:00", fach: "chi-ortho", pruef: "H. Heitkamp / P. Böggemann" },
+    { n: 12, ein: "Klinikum (1)",       befund: "Mo 07.09. 13:30 - 14:30", beh: "07.09. 14:30 - 15:00", fach: "neuro",     pruef: "A. Hilgersom / L. Knopf" },
+    { n: 13, ein: "Klinikum (2)",       befund: "Mo 07.09. 15:00 - 16:00", beh: "07.09. 16:00 - 16:30", fach: "neuro",     pruef: "A. Hilgersom / L. Knopf" },
+    { n: 14, ein: "Klinikum (3)",       befund: "Mi 09.09. 08:00 - 09:00", beh: "09.09. 09:00 - 09:30", fach: "neuro",     pruef: "A. Hilgersom / L. Knopf" },
+    { n: 15, ein: "Klinikum (4)",       befund: "Mi 09.09. 09:30 - 10:30", beh: "09.09. 10:30 - 11:00", fach: "neuro",     pruef: "A. Hilgersom / L. Knopf" },
+    { n: 16, ein: "Klinikum (5)",       befund: "Mi 09.09. 11:00 - 12:00", beh: "09.09. 12:00 - 12:30", fach: "neuro",     pruef: "A. Hilgersom / L. Knopf" },
+    { n: 17, ein: "Klinikum (6)",       befund: "Mi 09.09. 12:30 - 13:30", beh: "09.09. 13:30 - 14:00", fach: "neuro",     pruef: "A. Hilgersom / L. Knopf" },
+    { n: 18, ein: "FHH (1)",            befund: "Do 10.09. 08:30 - 09:30", beh: "10.09. 09:30 - 10:00", fach: "innere",    pruef: "L. Knopf / P. Böggemann" },
+    { n: 19, ein: "FHH (2)",            befund: "Do 10.09. 10:00 - 11:00", beh: "10.09. 11:00 - 11:30", fach: "innere",    pruef: "L. Knopf / P. Böggemann" },
+    { n: 20, ein: "FHH (3)",            befund: "Do 10.09. 11:30 - 12:30", beh: "10.09. 12:30 - 13:00", fach: "innere",    pruef: "L. Knopf / P. Böggemann" },
+    { n: 21, ein: "FHH (1)",            befund: "Do 10.09. 13:30 - 14:30", beh: "10.09. 14:30 - 15:00", fach: "chi-ortho", pruef: "L. Knopf / P. Böggemann" },
+    { n: 22, ein: "FHH (2)",            befund: "Do 10.09. 15:00 - 16:00", beh: "10.09. 16:00 - 16:30", fach: "chi-ortho", pruef: "L. Knopf / P. Böggemann" },
+    { n: 23, ein: "Schüchtermann (1)",  befund: "Fr 11.09. 08:00 - 09:00", beh: "11.09. 09:00 - 09:30", fach: "innere",    pruef: "L. Knopf / A. Hilgersom" },
+    { n: 24, ein: "Schüchtermann (2)",  befund: "Fr 11.09. 09:30 - 10:30", beh: "11.09. 10:30 - 11:00", fach: "innere",    pruef: "L. Knopf / A. Hilgersom" },
+    { n: 25, ein: "Schüchtermann (3)",  befund: "Fr 11.09. 11:00 - 12:00", beh: "11.09. 12:00 - 12:30", fach: "innere",    pruef: "L. Knopf / A. Hilgersom" },
+    { n: 26, ein: "Schüchtermann (4)",  befund: "Fr 11.09. 12:30 - 13:30", beh: "11.09. 13:30 - 14:00", fach: "innere",    pruef: "L. Knopf / A. Hilgersom" },
   ],
 };
 
@@ -514,11 +514,27 @@ function saveCurrentUser() {
   localStorage.setItem(USER_KEY, state.currentUser);
 }
 
-// Entry-Format: { name: "Max", wish: 1 }  // wish = 1 (Erstwunsch) oder 2 (Zweitwunsch)
+// Entry-Format: { name: "Max", wish: 1 }  // wish = 1 (Erst-), 2 (Zweit-), 3 (Drittwunsch)
 function toEntry(v) {
   if (typeof v === "string") return { name: v, wish: 1 };
-  if (v && typeof v === "object" && typeof v.n === "string") return { name: v.n, wish: v.w === 2 ? 2 : 1 };
+  if (v && typeof v === "object" && typeof v.n === "string") {
+    const w = (v.w === 2 || v.w === 3) ? v.w : 1;
+    return { name: v.n, wish: w };
+  }
   return null;
+}
+
+// Validiert eine Wunsch-Gruppe (Erst/Zweit/Dritt) für eine Person:
+// Genau 1× Chi/Ortho UND 1× (Innere ODER Neuro), in egal welcher Woche
+function validateWishGroup(slots36, slots37) {
+  if (slots36.length === 0 && slots37.length === 0) return { state: "empty" };
+  if (slots36.length > 1 || slots37.length > 1) return { state: "too-many" };
+  const all = [...slots36, ...slots37];
+  const hasChiOrtho = all.some(a => a.fach === "chi-ortho");
+  const hasInnereOrNeuro = all.some(a => a.fach === "innere" || a.fach === "neuro");
+  if (all.length === 2 && hasChiOrtho && hasInnereOrNeuro) return { state: "complete" };
+  if (all.length === 2) return { state: "wrong-combo", picked: all.map(a => FACH_LABELS[a.fach]).join(" + ") };
+  return { state: "partial", has: all.map(a => `${a.wk||""} ${FACH_LABELS[a.fach]}`).join(" · ") };
 }
 
 function normalizeSlot(val) {
@@ -598,55 +614,48 @@ function renderWeek(weekKey, tbodyId) {
   tbody.innerHTML = "";
   SLOTS[weekKey].forEach(slot => {
     const entries = state.assignments[weekKey][slot.n] || [];
-    const primary = entries.filter(e => e.wish === 1);
-    const secondary = entries.filter(e => e.wish === 2);
+    const w1 = entries.filter(e => e.wish === 1);
+    const w2 = entries.filter(e => e.wish === 2);
+    const w3 = entries.filter(e => e.wish === 3);
     const tr = document.createElement("tr");
     tr.className = `fach-${slot.fach}`;
-    if (primary.length > 1) tr.classList.add("double-booked");
+    if (w1.length > 1) tr.classList.add("double-booked");
 
-    let nameCellClass = "slot-name";
+    const renderLine = (arr, label, style) => {
+      if (arr.length === 0) return "";
+      const namesHtml = arr.map(e => {
+        const isMe = e.name === state.currentUser;
+        return `<span style="${isMe ? "color:#2563eb; font-weight:700" : style}">${escapeHtml(e.name)}</span>`;
+      }).join(", ");
+      let mark = "";
+      if (label === "1." && arr.length > 1) mark = ` <span class="badge error">${arr.length}× doppelt</span>`;
+      return `<div><strong style="font-size:11px; color:#666">${label} Wahl:</strong> ${namesHtml}${mark}</div>`;
+    };
+
     let nameHTML;
     if (entries.length === 0) {
       nameHTML = '<span class="empty">frei</span>';
     } else {
-      const parts = [];
-      if (primary.length > 0) {
-        const namesHtml = primary.map(e => {
-          const isMe = e.name === state.currentUser;
-          return `<span style="${isMe ? "color:#2563eb; font-weight:700" : ""}">${escapeHtml(e.name)}</span>`;
-        }).join(", ");
-        let mark = "";
-        if (primary.length > 1) mark = ` <span class="badge error">${primary.length}× doppelt</span>`;
-        parts.push(`<div><strong style="font-size:11px; color:#666">1. Wahl:</strong> ${namesHtml}${mark}</div>`);
-      }
-      if (secondary.length > 0) {
-        const namesHtml = secondary.map(e => {
-          const isMe = e.name === state.currentUser;
-          return `<span style="${isMe ? "color:#2563eb; font-weight:600" : "opacity:0.7"}; font-style:italic">${escapeHtml(e.name)}</span>`;
-        }).join(", ");
-        parts.push(`<div><strong style="font-size:11px; color:#666">2. Wahl:</strong> ${namesHtml}</div>`);
-      }
-      nameHTML = parts.join("");
+      nameHTML = renderLine(w1, "1.", "") + renderLine(w2, "2.", "opacity:0.75; font-style:italic") + renderLine(w3, "3.", "opacity:0.55; font-style:italic");
     }
 
     const myWishHere = entries.find(e => e.name === state.currentUser)?.wish;
     const canClick = !!state.currentUser;
     let btns = "";
     if (canClick) {
-      if (myWishHere === 1) {
-        btns = `<button class="claim-btn" data-week="${weekKey}" data-slot="${slot.n}" data-action="remove">✕ raus</button>`;
-      } else if (myWishHere === 2) {
-        btns = `<button class="claim-btn" data-week="${weekKey}" data-slot="${slot.n}" data-action="remove">✕ raus</button>`;
+      if (myWishHere) {
+        btns = `<button class="claim-btn" data-week="${weekKey}" data-slot="${slot.n}" data-action="remove">✕ raus (war ${myWishHere}. Wahl)</button>`;
       } else {
         btns = `
           <button class="claim-btn" data-week="${weekKey}" data-slot="${slot.n}" data-action="add1" style="background:#2563eb">+ 1. Wahl</button>
-          <button class="claim-btn" data-week="${weekKey}" data-slot="${slot.n}" data-action="add2" style="background:#94a3b8">+ 2. Wahl</button>`;
+          <button class="claim-btn" data-week="${weekKey}" data-slot="${slot.n}" data-action="add2" style="background:#64748b">+ 2. Wahl</button>
+          <button class="claim-btn" data-week="${weekKey}" data-slot="${slot.n}" data-action="add3" style="background:#94a3b8">+ 3. Wahl</button>`;
       }
     }
 
     tr.innerHTML = `
       <td class="row-num">${slot.n}</td>
-      <td class="${nameCellClass}">${nameHTML}<div style="margin-top:4px">${btns}</div></td>
+      <td class="slot-name">${nameHTML}<div style="margin-top:4px">${btns}</div></td>
       <td>${slot.ein}</td>
       <td>${slot.befund}</td>
       <td>${slot.beh}</td>
@@ -664,6 +673,7 @@ function renderWeek(weekKey, tbodyId) {
       if (action === "remove") removeFromSlot(wk, sl, state.currentUser);
       else if (action === "add1") addToSlot(wk, sl, state.currentUser, 1);
       else if (action === "add2") addToSlot(wk, sl, state.currentUser, 2);
+      else if (action === "add3") addToSlot(wk, sl, state.currentUser, 3);
     });
   });
 }
@@ -711,50 +721,45 @@ function renderEvaluation() {
     evalPerson.appendChild(hint);
   } else {
     people.forEach(name => {
-      const e36 = personSummary[name].kw36;
-      const e37 = personSummary[name].kw37;
-      const p36 = e36.filter(a => a.wish === 1);
-      const p37 = e37.filter(a => a.wish === 1);
-      const s36 = e36.filter(a => a.wish === 2);
-      const s37 = e37.filter(a => a.wish === 2);
-      const primary = [...p36, ...p37];
-      const facher = primary.map(a => a.fach);
-      const hasChiOrtho = facher.includes("chi-ortho");
-      const hasInnereOrNeuro = facher.includes("innere") || facher.includes("neuro");
+      const data = personSummary[name];
+      const w1 = { k36: data.kw36.filter(a => a.wish === 1), k37: data.kw37.filter(a => a.wish === 1) };
+      const w2 = { k36: data.kw36.filter(a => a.wish === 2), k37: data.kw37.filter(a => a.wish === 2) };
+      const w3 = { k36: data.kw36.filter(a => a.wish === 3), k37: data.kw37.filter(a => a.wish === 3) };
+      const v1 = validateWishGroup(w1.k36, w1.k37);
+      const v2 = validateWishGroup(w2.k36, w2.k37);
+      const v3 = validateWishGroup(w3.k36, w3.k37);
 
-      let status = "";
-      let badge = "";
+      const wishStatus = (v, w, label) => {
+        if (v.state === "empty") return `<span style="color:#94a3b8">${label}. —</span>`;
+        if (v.state === "complete") {
+          const k36 = w.k36[0] ? `KW36 ${FACH_LABELS[w.k36[0].fach]}` : "";
+          const k37 = w.k37[0] ? `KW37 ${FACH_LABELS[w.k37[0].fach]}` : "";
+          return `<span style="color:#166534">${label}. ✓ ${[k36, k37].filter(Boolean).join(" + ")}</span>`;
+        }
+        if (v.state === "too-many") return `<span style="color:#991b1b">${label}. ✕ zu viele</span>`;
+        if (v.state === "wrong-combo") return `<span style="color:#991b1b">${label}. ✕ ${v.picked}</span>`;
+        // partial
+        const k36 = w.k36[0] ? `KW36 ${FACH_LABELS[w.k36[0].fach]}` : "";
+        const k37 = w.k37[0] ? `KW37 ${FACH_LABELS[w.k37[0].fach]}` : "";
+        return `<span style="color:#92400e">${label}. ⏳ ${[k36, k37].filter(Boolean).join(" + ")}</span>`;
+      };
 
-      if (primary.length === 0 && s36.length === 0 && s37.length === 0) {
-        status = "noch nichts eingetragen";
-        badge = '<span class="badge warn">offen</span>';
-      } else if (p36.length > 1 || p37.length > 1) {
-        status = `mehrere Erstwünsche in einer Woche (KW36: ${p36.length}, KW37: ${p37.length})`;
+      let badge;
+      const allComplete = v1.state === "complete" && v2.state === "complete" && v3.state === "complete";
+      const hasError = [v1, v2, v3].some(v => v.state === "too-many" || v.state === "wrong-combo");
+      if (allComplete) badge = '<span class="badge ok">3/3 vollständig</span>';
+      else if (hasError) {
         badge = '<span class="badge error">FEHLER</span>';
-        errors.push(`${escapeHtml(name)}: zu viele Erstwünsche in einer Woche`);
-      } else if (p36.length === 1 && p37.length === 1 && hasChiOrtho && hasInnereOrNeuro) {
-        let s = `1. Wahl — KW36: ${FACH_LABELS[p36[0].fach]} (Slot ${p36[0].slot}) · KW37: ${FACH_LABELS[p37[0].fach]} (Slot ${p37[0].slot})`;
-        const sParts = [];
-        if (s36.length) sParts.push(`KW36: ${s36.map(a => `${FACH_LABELS[a.fach]} #${a.slot}`).join(", ")}`);
-        if (s37.length) sParts.push(`KW37: ${s37.map(a => `${FACH_LABELS[a.fach]} #${a.slot}`).join(", ")}`);
-        if (sParts.length) s += ` <em style="color:#666">| 2. Wahl — ${sParts.join(" · ")}</em>`;
-        status = s;
-        badge = '<span class="badge ok">vollständig</span>';
-      } else if (primary.length === 2 && (!hasChiOrtho || !hasInnereOrNeuro)) {
-        status = `falsche Kombination — Erstwunsch: ${primary.map(a => FACH_LABELS[a.fach]).join(" + ")}`;
-        badge = '<span class="badge error">FEHLER</span>';
-        errors.push(`${escapeHtml(name)}: braucht 1× Chi/Ortho UND 1× Innere oder Neuro als Erstwunsch`);
-      } else {
-        const have = [];
-        if (p36.length === 1) have.push(`KW36: ${FACH_LABELS[p36[0].fach]}`);
-        if (p37.length === 1) have.push(`KW37: ${FACH_LABELS[p37[0].fach]}`);
-        status = `Erstwunsch unvollständig — bisher: ${have.join(" · ") || "nichts"}`;
-        badge = '<span class="badge warn">unvollständig</span>';
+        errors.push(`${escapeHtml(name)}: ungültige Kombi in mindestens einer Wahl`);
       }
+      else if (v1.state === "empty" && v2.state === "empty" && v3.state === "empty") badge = '<span class="badge warn">leer</span>';
+      else badge = '<span class="badge warn">unvollständig</span>';
+
+      const status = [wishStatus(v1, w1, "1"), wishStatus(v2, w2, "2"), wishStatus(v3, w3, "3")].join(" · ");
 
       const row = document.createElement("div");
       row.className = "stat-row";
-      row.innerHTML = `<span><strong>${escapeHtml(name)}</strong> ${badge}</span><span style="text-align:right; max-width:60%">${status}</span>`;
+      row.innerHTML = `<span><strong>${escapeHtml(name)}</strong> ${badge}</span><span style="text-align:right; max-width:60%; font-size:12px">${status}</span>`;
       evalPerson.appendChild(row);
     });
   }
@@ -802,17 +807,19 @@ function renderEvaluation() {
       }
     }
   }
-  // Zusätzlich: gleiche Person mehrfach Erstwunsch in gleicher Woche
+  // Zusätzlich: gleiche Person mehrfach gleicher Wunschstufe in gleicher Woche
   const sameWeekDuplicates = [];
   for (const name of people) {
-    const p36 = personSummary[name].kw36.filter(a => a.wish === 1);
-    const p37 = personSummary[name].kw37.filter(a => a.wish === 1);
-    if (p36.length > 1) {
-      sameWeekDuplicates.push(`<strong>${escapeHtml(name)}</strong> hat ${p36.length} Erstwünsche in KW 36: ${p36.map(a => `#${a.slot} ${a.ein}`).join(", ")}`);
-    }
-    if (p37.length > 1) {
-      sameWeekDuplicates.push(`<strong>${escapeHtml(name)}</strong> hat ${p37.length} Erstwünsche in KW 37: ${p37.map(a => `#${a.slot} ${a.ein}`).join(", ")}`);
-    }
+    [1, 2, 3].forEach(w => {
+      const k36 = personSummary[name].kw36.filter(a => a.wish === w);
+      const k37 = personSummary[name].kw37.filter(a => a.wish === w);
+      if (k36.length > 1) {
+        sameWeekDuplicates.push(`<strong>${escapeHtml(name)}</strong> hat ${k36.length}× ${w}. Wahl in KW 36: ${k36.map(a => `#${a.slot} ${a.ein}`).join(", ")}`);
+      }
+      if (k37.length > 1) {
+        sameWeekDuplicates.push(`<strong>${escapeHtml(name)}</strong> hat ${k37.length}× ${w}. Wahl in KW 37: ${k37.map(a => `#${a.slot} ${a.ein}`).join(", ")}`);
+      }
+    });
   }
   const conflictBox = document.getElementById("conflictBox");
   const evalConflicts = document.getElementById("evalConflicts");
@@ -870,31 +877,37 @@ function renderOverview() {
 
   const people = Object.keys(personSummary).sort((a, b) => a.localeCompare(b, "de"));
 
-  // Personen kategorisieren
+  // Personen kategorisieren — alle 3 Wünsche müssen jeweils ein gültiges Paar sein
   const complete = [], incomplete = [], errors = [];
   people.forEach(name => {
-    const p36 = personSummary[name].kw36.filter(a => a.wish === 1);
-    const p37 = personSummary[name].kw37.filter(a => a.wish === 1);
-    const s36 = personSummary[name].kw36.filter(a => a.wish === 2);
-    const s37 = personSummary[name].kw37.filter(a => a.wish === 2);
-    const primary = [...p36, ...p37];
-    const hasChiOrtho = primary.some(a => a.fach === "chi-ortho");
-    const hasInnereOrNeuro = primary.some(a => a.fach === "innere" || a.fach === "neuro");
+    const data = personSummary[name];
+    const w1 = { k36: data.kw36.filter(a => a.wish === 1), k37: data.kw37.filter(a => a.wish === 1) };
+    const w2 = { k36: data.kw36.filter(a => a.wish === 2), k37: data.kw37.filter(a => a.wish === 2) };
+    const w3 = { k36: data.kw36.filter(a => a.wish === 3), k37: data.kw37.filter(a => a.wish === 3) };
+    const v1 = validateWishGroup(w1.k36, w1.k37);
+    const v2 = validateWishGroup(w2.k36, w2.k37);
+    const v3 = validateWishGroup(w3.k36, w3.k37);
 
-    if (p36.length > 1 || p37.length > 1) {
-      errors.push({ name, reason: `${p36.length}× Erstwunsch in KW36, ${p37.length}× in KW37` });
-    } else if (p36.length === 1 && p37.length === 1 && hasChiOrtho && hasInnereOrNeuro) {
-      complete.push({ name, p36: p36[0], p37: p37[0], s36, s37 });
-    } else if (primary.length === 2 && (!hasChiOrtho || !hasInnereOrNeuro)) {
-      errors.push({ name, reason: `falsche Kombi — ${primary.map(a => FACH_LABELS[a.fach]).join(" + ")} (braucht 1× Chi/Ortho UND 1× Innere/Neuro)` });
+    const allComplete = v1.state === "complete" && v2.state === "complete" && v3.state === "complete";
+    const errs = [];
+    [["1.", v1], ["2.", v2], ["3.", v3]].forEach(([label, v]) => {
+      if (v.state === "too-many") errs.push(`${label} Wahl: mehrere Slots in einer Woche`);
+      else if (v.state === "wrong-combo") errs.push(`${label} Wahl: falsche Kombi (${v.picked}) — braucht 1× Chi/Ortho + 1× Innere/Neuro`);
+    });
+
+    if (errs.length > 0) {
+      errors.push({ name, reasons: errs });
+    } else if (allComplete) {
+      complete.push({ name, w1, w2, w3 });
     } else {
+      const filled = [];
       const missing = [];
-      if (p36.length === 0) missing.push("KW36");
-      if (p37.length === 0) missing.push("KW37");
-      const has = [];
-      if (p36.length === 1) has.push(`KW36: ${FACH_LABELS[p36[0].fach]}`);
-      if (p37.length === 1) has.push(`KW37: ${FACH_LABELS[p37[0].fach]}`);
-      incomplete.push({ name, missing, has });
+      [["1.", v1], ["2.", v2], ["3.", v3]].forEach(([label, v]) => {
+        if (v.state === "complete") filled.push(label);
+        else if (v.state === "partial") missing.push(`${label} Wahl angefangen, aber unvollständig`);
+        else if (v.state === "empty") missing.push(`${label} Wahl noch leer`);
+      });
+      incomplete.push({ name, filled, missing });
     }
   });
 
@@ -977,7 +990,7 @@ function renderOverview() {
       <div class="overview-section critical">
         <h3>❌ Fehlerhafte Eintragungen (${errors.length})</h3>
         <ul class="overview-list">
-          ${errors.map(e => `<li><strong>${escapeHtml(e.name)}</strong> — ${e.reason}</li>`).join("")}
+          ${errors.map(e => `<li><strong>${escapeHtml(e.name)}</strong><br>${e.reasons.map(r => `&nbsp;&nbsp;• ${r}`).join("<br>")}</li>`).join("")}
         </ul>
       </div>
     `;
@@ -986,13 +999,13 @@ function renderOverview() {
   if (incomplete.length) {
     html += `
       <div class="overview-section warn">
-        <h3>⏳ Noch nicht vollständig (${incomplete.length})</h3>
+        <h3>⏳ Noch nicht alle 3 Wünsche vollständig (${incomplete.length})</h3>
         <ul class="overview-list">
           ${incomplete.map(p => `
             <li>
               <strong>${escapeHtml(p.name)}</strong>
-              ${p.has.length ? ` — schon: <em>${p.has.join(" · ")}</em>` : ""}
-              ${p.missing.length ? ` <span style="color:#92400e">→ fehlt: ${p.missing.join(" + ")}</span>` : ""}
+              ${p.filled.length ? ` <span style="color:#166534">✓ ${p.filled.join(" + ")} Wahl OK</span>` : ""}
+              ${p.missing.length ? `<br><span style="color:#92400e">→ ${p.missing.join(" · ")}</span>` : ""}
             </li>
           `).join("")}
         </ul>
@@ -1001,17 +1014,24 @@ function renderOverview() {
   }
 
   if (complete.length) {
+    const wishLine = (w, label) => {
+      const all = [...w.k36, ...w.k37];
+      if (all.length === 0) return "";
+      const k36 = w.k36[0] ? `KW36 #${w.k36[0].slot} <span class="badge ${w.k36[0].fach}">${FACH_LABELS[w.k36[0].fach]}</span>` : "";
+      const k37 = w.k37[0] ? `KW37 #${w.k37[0].slot} <span class="badge ${w.k37[0].fach}">${FACH_LABELS[w.k37[0].fach]}</span>` : "";
+      return `<div style="margin-left:14px; font-size:12px"><strong>${label}.</strong> ${[k36, k37].filter(Boolean).join(", ")}</div>`;
+    };
     html += `
       <div class="overview-section">
         <details>
-          <summary><strong style="color:#166534">✓ ${complete.length} Personen vollständig</strong> — Details aufklappen</summary>
+          <summary><strong style="color:#166534">✓ ${complete.length} Personen mit allen 3 vollständigen Wünschen</strong> — Details aufklappen</summary>
           <ul class="overview-list" style="margin-top:8px">
             ${complete.map(p => `
               <li>
-                <strong>${escapeHtml(p.name)}</strong> —
-                KW36 #${p.p36.slot} <span class="badge ${p.p36.fach}">${FACH_LABELS[p.p36.fach]}</span>,
-                KW37 #${p.p37.slot} <span class="badge ${p.p37.fach}">${FACH_LABELS[p.p37.fach]}</span>
-                ${(p.s36.length || p.s37.length) ? `<em style="color:#666; font-size:12px"> · 2. Wahl: ${[...p.s36, ...p.s37].map(a => `#${a.slot}`).join(", ")}</em>` : ""}
+                <strong>${escapeHtml(p.name)}</strong>
+                ${wishLine(p.w1, "1")}
+                ${wishLine(p.w2, "2")}
+                ${wishLine(p.w3, "3")}
               </li>
             `).join("")}
           </ul>
