@@ -276,7 +276,8 @@
     <div class="legend-item"><div class="legend-swatch" style="background:var(--color-neuro)"></div>Neuro</div>
   </div>
   <p class="help-text">
-    <strong>Regel:</strong> Jede Person trägt sich in <em>genau einen</em> Slot pro Woche ein — einmal Chi/Ortho und einmal Innere oder Neuro.
+    <strong>Regel:</strong> Jede Person trägt einen <strong style="color:#2563eb">Erstwunsch (1. Wahl)</strong> in jeder Woche ein — einmal Chi/Ortho und einmal Innere oder Neuro.
+    Zusätzlich kann optional ein <em style="color:#64748b">Zweitwunsch (2. Wahl)</em> als Backup angegeben werden, falls der Erstwunsch belegt ist.
     Es ist egal, in welcher Woche welches Fach liegt. Es sollten insgesamt 25 Personen sein.
   </p>
 </div>
@@ -451,11 +452,21 @@ function saveCurrentUser() {
   localStorage.setItem(USER_KEY, state.currentUser);
 }
 
+// Entry-Format: { name: "Max", wish: 1 }  // wish = 1 (Erstwunsch) oder 2 (Zweitwunsch)
+function toEntry(v) {
+  if (typeof v === "string") return { name: v, wish: 1 };
+  if (v && typeof v === "object" && typeof v.n === "string") return { name: v.n, wish: v.w === 2 ? 2 : 1 };
+  return null;
+}
+
 function normalizeSlot(val) {
   if (val == null) return [];
-  if (typeof val === "string") return [val];
-  if (Array.isArray(val)) return val.filter(n => typeof n === "string" && n);
-  if (typeof val === "object") return Object.values(val).filter(n => typeof n === "string" && n);
+  if (typeof val === "string") {
+    const e = toEntry(val);
+    return e ? [e] : [];
+  }
+  if (Array.isArray(val)) return val.map(toEntry).filter(Boolean);
+  if (typeof val === "object") return Object.values(val).map(toEntry).filter(Boolean);
   return [];
 }
 
@@ -468,43 +479,43 @@ function normalizeWeek(weekData) {
   return out;
 }
 
-async function toggleClaim(week, slotN, name) {
+async function addToSlot(week, slotN, name, wish) {
+  if (!name) return;
+  const slotPath = `pruefungsplan/${week}/${slotN}`;
+  const slotRef = ref(fbDb, slotPath);
+  const snap = await get(slotRef);
+  const current = snap.val();
+  const newEntry = { n: name, w: wish };
+
+  // Legacy: existing entry is a single string → konvertieren
+  if (typeof current === "string") {
+    const k1 = push(slotRef).key;
+    const k2 = push(slotRef).key;
+    await set(slotRef, { [k1]: { n: current, w: 1 }, [k2]: newEntry });
+    return;
+  }
+  await push(slotRef, newEntry);
+}
+
+async function removeFromSlot(week, slotN, name) {
   if (!name) return;
   const slotPath = `pruefungsplan/${week}/${slotN}`;
   const slotRef = ref(fbDb, slotPath);
   const snap = await get(slotRef);
   const current = snap.val();
 
-  // Already legacy single-name string?
   if (typeof current === "string") {
-    if (current === name) {
-      // Was only me — clear slot
-      await remove(slotRef);
-    } else {
-      // Convert to multi-entry object: old name + new name
-      const k1 = push(slotRef).key;
-      const k2 = push(slotRef).key;
-      await set(slotRef, { [k1]: current, [k2]: name });
-    }
+    if (current === name) await remove(slotRef);
     return;
   }
-
-  // Object format: find my push-key
   if (current && typeof current === "object") {
-    let myKey = null;
     for (const [k, v] of Object.entries(current)) {
-      if (v === name) { myKey = k; break; }
+      const e = toEntry(v);
+      if (e && e.name === name) {
+        await remove(ref(fbDb, `${slotPath}/${k}`));
+      }
     }
-    if (myKey) {
-      await remove(ref(fbDb, `${slotPath}/${myKey}`));
-    } else {
-      await push(slotRef, name);
-    }
-    return;
   }
-
-  // Slot was empty — add me
-  await push(slotRef, name);
 }
 
 // ============================================================
@@ -524,31 +535,56 @@ function renderWeek(weekKey, tbodyId) {
   const tbody = document.getElementById(tbodyId);
   tbody.innerHTML = "";
   SLOTS[weekKey].forEach(slot => {
-    const names = state.assignments[weekKey][slot.n] || [];
+    const entries = state.assignments[weekKey][slot.n] || [];
+    const primary = entries.filter(e => e.wish === 1);
+    const secondary = entries.filter(e => e.wish === 2);
     const tr = document.createElement("tr");
     tr.className = `fach-${slot.fach}`;
-    if (names.length > 1) tr.classList.add("double-booked");
+    if (primary.length > 1) tr.classList.add("double-booked");
 
-    let nameDisplay;
     let nameCellClass = "slot-name";
-    if (names.length === 0) {
-      nameDisplay = "frei";
-      nameCellClass += " empty";
-    } else if (names.length === 1) {
-      nameDisplay = escapeHtml(names[0]);
-      if (names[0] === state.currentUser) nameCellClass += " mine";
+    let nameHTML;
+    if (entries.length === 0) {
+      nameHTML = '<span class="empty">frei</span>';
     } else {
-      nameDisplay = names.map(escapeHtml).join(", ") + ` <span class="badge error">${names.length}× doppelt</span>`;
-      nameCellClass += " conflict";
+      const parts = [];
+      if (primary.length > 0) {
+        const namesHtml = primary.map(e => {
+          const isMe = e.name === state.currentUser;
+          return `<span style="${isMe ? "color:#2563eb; font-weight:700" : ""}">${escapeHtml(e.name)}</span>`;
+        }).join(", ");
+        let mark = "";
+        if (primary.length > 1) mark = ` <span class="badge error">${primary.length}× doppelt</span>`;
+        parts.push(`<div><strong style="font-size:11px; color:#666">1. Wahl:</strong> ${namesHtml}${mark}</div>`);
+      }
+      if (secondary.length > 0) {
+        const namesHtml = secondary.map(e => {
+          const isMe = e.name === state.currentUser;
+          return `<span style="${isMe ? "color:#2563eb; font-weight:600" : "opacity:0.7"}; font-style:italic">${escapeHtml(e.name)}</span>`;
+        }).join(", ");
+        parts.push(`<div><strong style="font-size:11px; color:#666">2. Wahl:</strong> ${namesHtml}</div>`);
+      }
+      nameHTML = parts.join("");
     }
 
-    const userInList = state.currentUser && names.includes(state.currentUser);
+    const myWishHere = entries.find(e => e.name === state.currentUser)?.wish;
     const canClick = !!state.currentUser;
-    const btnLabel = userInList ? "✕ mich entfernen" : "+ ich";
+    let btns = "";
+    if (canClick) {
+      if (myWishHere === 1) {
+        btns = `<button class="claim-btn" data-week="${weekKey}" data-slot="${slot.n}" data-action="remove">✕ raus</button>`;
+      } else if (myWishHere === 2) {
+        btns = `<button class="claim-btn" data-week="${weekKey}" data-slot="${slot.n}" data-action="remove">✕ raus</button>`;
+      } else {
+        btns = `
+          <button class="claim-btn" data-week="${weekKey}" data-slot="${slot.n}" data-action="add1" style="background:#2563eb">+ 1. Wahl</button>
+          <button class="claim-btn" data-week="${weekKey}" data-slot="${slot.n}" data-action="add2" style="background:#94a3b8">+ 2. Wahl</button>`;
+      }
+    }
 
     tr.innerHTML = `
       <td class="row-num">${slot.n}</td>
-      <td class="${nameCellClass}">${nameDisplay}${canClick ? `<button class="claim-btn" data-week="${weekKey}" data-slot="${slot.n}">${btnLabel}</button>` : ""}</td>
+      <td class="${nameCellClass}">${nameHTML}<div style="margin-top:4px">${btns}</div></td>
       <td>${slot.ein}</td>
       <td>${slot.befund}</td>
       <td>${slot.beh}</td>
@@ -562,7 +598,10 @@ function renderWeek(weekKey, tbodyId) {
     btn.addEventListener("click", () => {
       const wk = btn.dataset.week;
       const sl = btn.dataset.slot;
-      toggleClaim(wk, sl, state.currentUser);
+      const action = btn.dataset.action;
+      if (action === "remove") removeFromSlot(wk, sl, state.currentUser);
+      else if (action === "add1") addToSlot(wk, sl, state.currentUser, 1);
+      else if (action === "add2") addToSlot(wk, sl, state.currentUser, 2);
     });
   });
 }
@@ -572,17 +611,17 @@ function escapeHtml(s) {
 }
 
 function renderEvaluation() {
-  const personSummary = {};
+  const personSummary = {}; // name → { kw36: [{slot, fach, ein, wish}], kw37: [...] }
 
   for (const wk of ["kw36", "kw37"]) {
-    for (const [slotN, names] of Object.entries(state.assignments[wk])) {
-      if (!Array.isArray(names) || names.length === 0) continue;
+    for (const [slotN, entries] of Object.entries(state.assignments[wk])) {
+      if (!Array.isArray(entries) || entries.length === 0) continue;
       const slot = SLOTS[wk].find(s => s.n == slotN);
       if (!slot) continue;
-      names.forEach(name => {
-        if (!name) return;
-        if (!personSummary[name]) personSummary[name] = { kw36: [], kw37: [] };
-        personSummary[name][wk].push({ slot: slot.n, fach: slot.fach, ein: slot.ein });
+      entries.forEach(e => {
+        if (!e || !e.name) return;
+        if (!personSummary[e.name]) personSummary[e.name] = { kw36: [], kw37: [] };
+        personSummary[e.name][wk].push({ slot: slot.n, fach: slot.fach, ein: slot.ein, wish: e.wish });
       });
     }
   }
@@ -612,39 +651,48 @@ function renderEvaluation() {
     people.forEach(name => {
       const e36 = personSummary[name].kw36;
       const e37 = personSummary[name].kw37;
-      const all = [...e36, ...e37];
-      const facher = all.map(a => a.fach);
+      const p36 = e36.filter(a => a.wish === 1);
+      const p37 = e37.filter(a => a.wish === 1);
+      const s36 = e36.filter(a => a.wish === 2);
+      const s37 = e37.filter(a => a.wish === 2);
+      const primary = [...p36, ...p37];
+      const facher = primary.map(a => a.fach);
       const hasChiOrtho = facher.includes("chi-ortho");
       const hasInnereOrNeuro = facher.includes("innere") || facher.includes("neuro");
 
       let status = "";
       let badge = "";
 
-      if (e36.length === 0 && e37.length === 0) {
+      if (primary.length === 0 && s36.length === 0 && s37.length === 0) {
         status = "noch nichts eingetragen";
         badge = '<span class="badge warn">offen</span>';
-      } else if (e36.length > 1 || e37.length > 1) {
-        status = `mehrere Slots in einer Woche (KW36: ${e36.length}, KW37: ${e37.length})`;
+      } else if (p36.length > 1 || p37.length > 1) {
+        status = `mehrere Erstwünsche in einer Woche (KW36: ${p36.length}, KW37: ${p37.length})`;
         badge = '<span class="badge error">FEHLER</span>';
-        errors.push(`${name}: zu viele Slots in einer Woche`);
-      } else if (e36.length === 1 && e37.length === 1 && hasChiOrtho && hasInnereOrNeuro) {
-        status = `KW36: ${FACH_LABELS[e36[0].fach]} (Slot ${e36[0].slot}) · KW37: ${FACH_LABELS[e37[0].fach]} (Slot ${e37[0].slot})`;
+        errors.push(`${escapeHtml(name)}: zu viele Erstwünsche in einer Woche`);
+      } else if (p36.length === 1 && p37.length === 1 && hasChiOrtho && hasInnereOrNeuro) {
+        let s = `1. Wahl — KW36: ${FACH_LABELS[p36[0].fach]} (Slot ${p36[0].slot}) · KW37: ${FACH_LABELS[p37[0].fach]} (Slot ${p37[0].slot})`;
+        const sParts = [];
+        if (s36.length) sParts.push(`KW36: ${s36.map(a => `${FACH_LABELS[a.fach]} #${a.slot}`).join(", ")}`);
+        if (s37.length) sParts.push(`KW37: ${s37.map(a => `${FACH_LABELS[a.fach]} #${a.slot}`).join(", ")}`);
+        if (sParts.length) s += ` <em style="color:#666">| 2. Wahl — ${sParts.join(" · ")}</em>`;
+        status = s;
         badge = '<span class="badge ok">vollständig</span>';
-      } else if (e36.length + e37.length === 2 && (!hasChiOrtho || !hasInnereOrNeuro)) {
-        status = `falsche Kombination — gewählt: ${all.map(a => FACH_LABELS[a.fach]).join(" + ")}`;
+      } else if (primary.length === 2 && (!hasChiOrtho || !hasInnereOrNeuro)) {
+        status = `falsche Kombination — Erstwunsch: ${primary.map(a => FACH_LABELS[a.fach]).join(" + ")}`;
         badge = '<span class="badge error">FEHLER</span>';
-        errors.push(`${name}: braucht 1× Chi/Ortho UND 1× Innere oder Neuro`);
+        errors.push(`${escapeHtml(name)}: braucht 1× Chi/Ortho UND 1× Innere oder Neuro als Erstwunsch`);
       } else {
         const have = [];
-        if (e36.length === 1) have.push(`KW36: ${FACH_LABELS[e36[0].fach]}`);
-        if (e37.length === 1) have.push(`KW37: ${FACH_LABELS[e37[0].fach]}`);
-        status = `unvollständig — bisher: ${have.join(" · ") || "nichts"}`;
+        if (p36.length === 1) have.push(`KW36: ${FACH_LABELS[p36[0].fach]}`);
+        if (p37.length === 1) have.push(`KW37: ${FACH_LABELS[p37[0].fach]}`);
+        status = `Erstwunsch unvollständig — bisher: ${have.join(" · ") || "nichts"}`;
         badge = '<span class="badge warn">unvollständig</span>';
       }
 
       const row = document.createElement("div");
       row.className = "stat-row";
-      row.innerHTML = `<span><strong>${name}</strong> ${badge}</span><span style="text-align:right">${status}</span>`;
+      row.innerHTML = `<span><strong>${escapeHtml(name)}</strong> ${badge}</span><span style="text-align:right; max-width:60%">${status}</span>`;
       evalPerson.appendChild(row);
     });
   }
@@ -656,14 +704,15 @@ function renderEvaluation() {
   for (const wk of ["kw36", "kw37"]) {
     SLOTS[wk].forEach(slot => {
       fachStats[slot.fach].total++;
-      const names = state.assignments[wk][slot.n];
-      if (Array.isArray(names) && names.length > 0) fachStats[slot.fach].taken++;
+      const entries = state.assignments[wk][slot.n];
+      // Zählt nur Slots, die einen Erstwunsch haben
+      if (Array.isArray(entries) && entries.some(e => e.wish === 1)) fachStats[slot.fach].taken++;
     });
   }
   Object.entries(fachStats).forEach(([fach, st]) => {
     const row = document.createElement("div");
     row.className = "stat-row";
-    row.innerHTML = `<span><span class="badge ${fach}">${FACH_LABELS[fach]}</span></span><span><strong>${st.taken}</strong> / ${st.total} Slots mit min. 1 Person</span>`;
+    row.innerHTML = `<span><span class="badge ${fach}">${FACH_LABELS[fach]}</span></span><span><strong>${st.taken}</strong> / ${st.total} Slots mit Erstwunsch</span>`;
     evalStats.appendChild(row);
   });
   const totalSlots = fachStats["chi-ortho"].total + fachStats["innere"].total + fachStats["neuro"].total;
@@ -673,29 +722,34 @@ function renderEvaluation() {
   totalRow.innerHTML = `<span><strong>Gesamt</strong></span><span><strong>${totalTaken}</strong> / ${totalSlots} Slots belegt</span>`;
   evalStats.appendChild(totalRow);
 
-  // Doppelt belegte Slots: mehrere Personen auf einem Slot
+  // Doppelt belegte Slots: mehrere Erstwünsche auf einem Slot
   const doubleBookings = [];
   for (const wk of ["kw36", "kw37"]) {
     const wkLabel = wk === "kw36" ? "KW 36" : "KW 37";
-    for (const [slotN, names] of Object.entries(state.assignments[wk])) {
-      if (Array.isArray(names) && names.length > 1) {
+    for (const [slotN, entries] of Object.entries(state.assignments[wk])) {
+      if (!Array.isArray(entries)) continue;
+      const primaryNames = entries.filter(e => e.wish === 1).map(e => e.name);
+      if (primaryNames.length > 1) {
         const slot = SLOTS[wk].find(s => s.n == slotN);
         if (!slot) continue;
-        doubleBookings.push(
-          `<strong>${wkLabel} · Slot ${slot.n}</strong> (${slot.ein}, ${FACH_LABELS[slot.fach]}): ` +
-          `<span style="color:#991b1b; font-weight:600">${names.length} Personen</span> — ${names.map(escapeHtml).join(", ")}`
-        );
+        const secondaryNames = entries.filter(e => e.wish === 2).map(e => e.name);
+        let line = `<strong>${wkLabel} · Slot ${slot.n}</strong> (${slot.ein}, ${FACH_LABELS[slot.fach]}): ` +
+          `<span style="color:#991b1b; font-weight:600">${primaryNames.length} Erstwünsche</span> — ${primaryNames.map(escapeHtml).join(", ")}`;
+        if (secondaryNames.length) line += ` <em style="color:#666">(2. Wahl: ${secondaryNames.map(escapeHtml).join(", ")})</em>`;
+        doubleBookings.push(line);
       }
     }
   }
-  // Zusätzlich: gleiche Person mehrfach in gleicher Woche
+  // Zusätzlich: gleiche Person mehrfach Erstwunsch in gleicher Woche
   const sameWeekDuplicates = [];
   for (const name of people) {
-    if (personSummary[name].kw36.length > 1) {
-      sameWeekDuplicates.push(`<strong>${escapeHtml(name)}</strong> hat ${personSummary[name].kw36.length} Slots in KW 36: ${personSummary[name].kw36.map(a => `#${a.slot} ${a.ein}`).join(", ")}`);
+    const p36 = personSummary[name].kw36.filter(a => a.wish === 1);
+    const p37 = personSummary[name].kw37.filter(a => a.wish === 1);
+    if (p36.length > 1) {
+      sameWeekDuplicates.push(`<strong>${escapeHtml(name)}</strong> hat ${p36.length} Erstwünsche in KW 36: ${p36.map(a => `#${a.slot} ${a.ein}`).join(", ")}`);
     }
-    if (personSummary[name].kw37.length > 1) {
-      sameWeekDuplicates.push(`<strong>${escapeHtml(name)}</strong> hat ${personSummary[name].kw37.length} Slots in KW 37: ${personSummary[name].kw37.map(a => `#${a.slot} ${a.ein}`).join(", ")}`);
+    if (p37.length > 1) {
+      sameWeekDuplicates.push(`<strong>${escapeHtml(name)}</strong> hat ${p37.length} Erstwünsche in KW 37: ${p37.map(a => `#${a.slot} ${a.ein}`).join(", ")}`);
     }
   }
   const conflictBox = document.getElementById("conflictBox");
@@ -723,8 +777,8 @@ function renderEvaluation() {
   evalFree.innerHTML = "";
   for (const wk of ["kw36", "kw37"]) {
     const free = SLOTS[wk].filter(s => {
-      const names = state.assignments[wk][s.n];
-      return !Array.isArray(names) || names.length === 0;
+      const entries = state.assignments[wk][s.n];
+      return !Array.isArray(entries) || entries.length === 0;
     });
     const row = document.createElement("div");
     row.className = "stat-row";
