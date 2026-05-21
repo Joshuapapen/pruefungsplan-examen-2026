@@ -255,6 +255,63 @@
     pointer-events: none;
   }
   .toast.show { opacity: 1; }
+
+  /* Übersicht oben */
+  .big-stats {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+    gap: 10px;
+    margin-bottom: 16px;
+  }
+  .stat-box {
+    padding: 14px;
+    border-radius: 8px;
+    text-align: center;
+    font-weight: 700;
+    font-size: 30px;
+    line-height: 1;
+  }
+  .stat-box span {
+    display: block;
+    font-size: 12px;
+    font-weight: 500;
+    margin-top: 6px;
+    opacity: 0.85;
+  }
+  .stat-box.ok { background: #dcfce7; color: #166534; }
+  .stat-box.warn { background: #fef3c7; color: #92400e; }
+  .stat-box.error { background: #fee2e2; color: #991b1b; }
+  .stat-box.info { background: #dbeafe; color: #1e40af; }
+  .overview-section {
+    margin-top: 14px;
+    padding-top: 12px;
+    border-top: 1px solid var(--color-border);
+  }
+  .overview-section h3 {
+    margin: 0 0 8px 0;
+    font-size: 14px;
+  }
+  .overview-list {
+    margin: 0;
+    padding-left: 20px;
+    font-size: 13px;
+    line-height: 1.7;
+  }
+  .overview-section.critical h3 { color: #991b1b; }
+  .overview-section.warn h3 { color: #92400e; }
+  .fach-mini-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+    gap: 8px;
+    margin-top: 8px;
+  }
+  .fach-mini-cell {
+    padding: 8px 10px;
+    border-radius: 6px;
+    font-size: 12px;
+    border: 1px solid var(--color-border);
+  }
+  .fach-mini-cell strong { font-size: 14px; display: block; margin-bottom: 2px; }
 </style>
 </head>
 <body>
@@ -280,6 +337,11 @@
     Zusätzlich kann optional ein <em style="color:#64748b">Zweitwunsch (2. Wahl)</em> als Backup angegeben werden, falls der Erstwunsch belegt ist.
     Es ist egal, in welcher Woche welches Fach liegt. Es sollten insgesamt 25 Personen sein.
   </p>
+</div>
+
+<div class="card" id="overviewCard">
+  <h2>📋 Schnellübersicht</h2>
+  <div id="overview"></div>
 </div>
 
 <div class="weeks">
@@ -788,7 +850,185 @@ function renderEvaluation() {
   }
 }
 
+function renderOverview() {
+  const container = document.getElementById("overview");
+
+  // Personen-Daten aggregieren
+  const personSummary = {};
+  for (const wk of ["kw36", "kw37"]) {
+    for (const [slotN, entries] of Object.entries(state.assignments[wk])) {
+      if (!Array.isArray(entries) || entries.length === 0) continue;
+      const slot = SLOTS[wk].find(s => s.n == slotN);
+      if (!slot) continue;
+      entries.forEach(e => {
+        if (!e || !e.name) return;
+        if (!personSummary[e.name]) personSummary[e.name] = { kw36: [], kw37: [] };
+        personSummary[e.name][wk].push({ slot: slot.n, fach: slot.fach, ein: slot.ein, wish: e.wish });
+      });
+    }
+  }
+
+  const people = Object.keys(personSummary).sort((a, b) => a.localeCompare(b, "de"));
+
+  // Personen kategorisieren
+  const complete = [], incomplete = [], errors = [];
+  people.forEach(name => {
+    const p36 = personSummary[name].kw36.filter(a => a.wish === 1);
+    const p37 = personSummary[name].kw37.filter(a => a.wish === 1);
+    const s36 = personSummary[name].kw36.filter(a => a.wish === 2);
+    const s37 = personSummary[name].kw37.filter(a => a.wish === 2);
+    const primary = [...p36, ...p37];
+    const hasChiOrtho = primary.some(a => a.fach === "chi-ortho");
+    const hasInnereOrNeuro = primary.some(a => a.fach === "innere" || a.fach === "neuro");
+
+    if (p36.length > 1 || p37.length > 1) {
+      errors.push({ name, reason: `${p36.length}× Erstwunsch in KW36, ${p37.length}× in KW37` });
+    } else if (p36.length === 1 && p37.length === 1 && hasChiOrtho && hasInnereOrNeuro) {
+      complete.push({ name, p36: p36[0], p37: p37[0], s36, s37 });
+    } else if (primary.length === 2 && (!hasChiOrtho || !hasInnereOrNeuro)) {
+      errors.push({ name, reason: `falsche Kombi — ${primary.map(a => FACH_LABELS[a.fach]).join(" + ")} (braucht 1× Chi/Ortho UND 1× Innere/Neuro)` });
+    } else {
+      const missing = [];
+      if (p36.length === 0) missing.push("KW36");
+      if (p37.length === 0) missing.push("KW37");
+      const has = [];
+      if (p36.length === 1) has.push(`KW36: ${FACH_LABELS[p36[0].fach]}`);
+      if (p37.length === 1) has.push(`KW37: ${FACH_LABELS[p37[0].fach]}`);
+      incomplete.push({ name, missing, has });
+    }
+  });
+
+  // Konflikte: mehrere Erstwünsche auf einem Slot
+  const conflicts = [];
+  for (const wk of ["kw36", "kw37"]) {
+    const wkLabel = wk === "kw36" ? "KW 36" : "KW 37";
+    for (const [slotN, entries] of Object.entries(state.assignments[wk])) {
+      if (!Array.isArray(entries)) continue;
+      const primaryNames = entries.filter(e => e.wish === 1).map(e => e.name);
+      const secondaryNames = entries.filter(e => e.wish === 2).map(e => e.name);
+      if (primaryNames.length > 1) {
+        const slot = SLOTS[wk].find(s => s.n == slotN);
+        conflicts.push({ wk: wkLabel, slot: slot.n, ein: slot.ein, fach: slot.fach, primary: primaryNames, secondary: secondaryNames });
+      }
+    }
+  }
+
+  // Belegung pro Fach
+  const fachBelegung = {};
+  ["kw36", "kw37"].forEach(wk => {
+    ["chi-ortho", "innere", "neuro"].forEach(fach => {
+      fachBelegung[`${wk}-${fach}`] = { total: 0, taken: 0, free: 0, fach, wk };
+    });
+  });
+  for (const wk of ["kw36", "kw37"]) {
+    SLOTS[wk].forEach(slot => {
+      const key = `${wk}-${slot.fach}`;
+      fachBelegung[key].total++;
+      const entries = state.assignments[wk][slot.n];
+      const hasPrimary = Array.isArray(entries) && entries.some(e => e.wish === 1);
+      if (hasPrimary) fachBelegung[key].taken++;
+      else fachBelegung[key].free++;
+    });
+  }
+
+  // HTML rendern
+  let html = `
+    <div class="big-stats">
+      <div class="stat-box ok">${complete.length}<span>von 25 vollständig</span></div>
+      <div class="stat-box warn">${incomplete.length}<span>unvollständig</span></div>
+      <div class="stat-box error">${errors.length}<span>Fehler</span></div>
+      <div class="stat-box info">${conflicts.length}<span>Konflikt-Slots</span></div>
+    </div>
+
+    <div class="fach-mini-grid">
+      ${["kw36", "kw37"].flatMap(wk =>
+        ["chi-ortho", "innere", "neuro"].map(fach => {
+          const st = fachBelegung[`${wk}-${fach}`];
+          if (st.total === 0) return "";
+          const wkLabel = wk === "kw36" ? "KW 36" : "KW 37";
+          return `<div class="fach-mini-cell" style="background:rgba(${fach==='chi-ortho'?'242,165,165':fach==='innere'?'240,204,121':'166,199,129'},0.15)">
+            <strong>${wkLabel} · ${FACH_LABELS[fach]}</strong>
+            ${st.taken} / ${st.total} Slots belegt — ${st.free} frei
+          </div>`;
+        })
+      ).filter(Boolean).join("")}
+    </div>
+  `;
+
+  if (conflicts.length) {
+    html += `
+      <div class="overview-section critical">
+        <h3>⚠️ Doppelt belegte Slots (${conflicts.length})</h3>
+        <ul class="overview-list">
+          ${conflicts.map(c => `
+            <li>
+              <strong>${c.wk} · Slot ${c.slot}</strong> — ${c.ein} <span class="badge ${c.fach}">${FACH_LABELS[c.fach]}</span><br>
+              <strong style="color:#991b1b">${c.primary.length} Erstwünsche:</strong> ${c.primary.map(escapeHtml).join(", ")}
+              ${c.secondary.length ? `<br><em style="color:#666">2. Wahl: ${c.secondary.map(escapeHtml).join(", ")}</em>` : ""}
+            </li>
+          `).join("")}
+        </ul>
+      </div>
+    `;
+  }
+
+  if (errors.length) {
+    html += `
+      <div class="overview-section critical">
+        <h3>❌ Fehlerhafte Eintragungen (${errors.length})</h3>
+        <ul class="overview-list">
+          ${errors.map(e => `<li><strong>${escapeHtml(e.name)}</strong> — ${e.reason}</li>`).join("")}
+        </ul>
+      </div>
+    `;
+  }
+
+  if (incomplete.length) {
+    html += `
+      <div class="overview-section warn">
+        <h3>⏳ Noch nicht vollständig (${incomplete.length})</h3>
+        <ul class="overview-list">
+          ${incomplete.map(p => `
+            <li>
+              <strong>${escapeHtml(p.name)}</strong>
+              ${p.has.length ? ` — schon: <em>${p.has.join(" · ")}</em>` : ""}
+              ${p.missing.length ? ` <span style="color:#92400e">→ fehlt: ${p.missing.join(" + ")}</span>` : ""}
+            </li>
+          `).join("")}
+        </ul>
+      </div>
+    `;
+  }
+
+  if (complete.length) {
+    html += `
+      <div class="overview-section">
+        <details>
+          <summary><strong style="color:#166534">✓ ${complete.length} Personen vollständig</strong> — Details aufklappen</summary>
+          <ul class="overview-list" style="margin-top:8px">
+            ${complete.map(p => `
+              <li>
+                <strong>${escapeHtml(p.name)}</strong> —
+                KW36 #${p.p36.slot} <span class="badge ${p.p36.fach}">${FACH_LABELS[p.p36.fach]}</span>,
+                KW37 #${p.p37.slot} <span class="badge ${p.p37.fach}">${FACH_LABELS[p.p37.fach]}</span>
+                ${(p.s36.length || p.s37.length) ? `<em style="color:#666; font-size:12px"> · 2. Wahl: ${[...p.s36, ...p.s37].map(a => `#${a.slot}`).join(", ")}</em>` : ""}
+              </li>
+            `).join("")}
+          </ul>
+        </details>
+      </div>
+    `;
+  }
+
+  if (people.length === 0) {
+    html += `<p class="help-text" style="margin-top:12px">Noch niemand eingetragen — sobald sich jemand einträgt, erscheint hier die Übersicht.</p>`;
+  }
+
+  container.innerHTML = html;
+}
+
 function renderAll() {
+  renderOverview();
   renderWeek("kw36", "kw36-body");
   renderWeek("kw37", "kw37-body");
   renderEvaluation();
