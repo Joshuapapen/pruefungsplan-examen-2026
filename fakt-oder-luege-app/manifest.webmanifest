@@ -1,0 +1,15 @@
+{
+  "name": "Fakt oder Lüge",
+  "short_name": "Fakt/Lüge",
+  "lang": "de",
+  "start_url": "./index.html",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#262c5e",
+  "theme_color": "#262c5e",
+  "icons": [
+    { "src": "icons/icon-192.png", "sizes": "192x192", "type": "image/png" },
+    { "src": "icons/icon-512.png", "sizes": "512x512", "type": "image/png" }
+  ]
+}
