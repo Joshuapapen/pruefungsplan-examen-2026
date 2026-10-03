@@ -111,10 +111,104 @@ const FACTS = [
   ["Pinguine leben natürlicherweise am Nordpol.", false, "Pinguine leben fast nur auf der Südhalbkugel, am Nordpol gibt es keine."],
   ["Napoleon war für seine Zeit ungewöhnlich klein.", false, "Er hatte etwa Durchschnittsgröße. Der Mythos entstand durch Missverständnisse bei Maßeinheiten und Karikaturen."],
   ["Honigbienen sterben in der Regel, nachdem sie ein Säugetier gestochen haben.", true, "Der Stachel mit Widerhaken bleibt in der Haut stecken."],
-  ["Ein erwachsener Mensch hat 206 Knochen.", true, "Bei Babys sind es mehr, viele wachsen später zusammen."]
+  ["Ein erwachsener Mensch hat 206 Knochen.", true, "Bei Babys sind es mehr, viele wachsen später zusammen."],
+  ["Die Zugspitze ist der höchste Berg Deutschlands.", true, "Sie liegt in den Bayerischen Alpen an der Grenze zu Österreich."],
+  ["Der Rhein fließt durch Berlin.", false, "Durch Berlin fließen Spree und Havel."],
+  ["Die Hauptstadt von Kanada ist Toronto.", false, "Die Hauptstadt ist Ottawa."],
+  ["Die Hauptstadt von Brasilien ist Brasília.", true, "Nicht Rio de Janeiro oder São Paulo, Brasília wurde als Hauptstadt neu gebaut."],
+  ["Die Hauptstadt der Türkei ist Istanbul.", false, "Die Hauptstadt ist Ankara."],
+  ["Der Kilimandscharo liegt in Tansania.", true, "Er ist der höchste Berg Afrikas."],
+  ["Afrika ist der flächenmäßig größte Kontinent.", false, "Asien ist der größte Kontinent."],
+  ["Russland liegt komplett in Europa.", false, "Der größte Teil des Landes liegt in Asien."],
+  ["Kängurus sind in Australien heimisch.", true, "Sie leben dort natürlicherweise, ebenso auf Neuguinea."],
+  ["Koalas sind eine Bärenart.", false, "Koalas sind Beuteltiere."],
+  ["Der Blauwal ist das größte heute lebende Tier.", true, "Er übertrifft auch die größten Landtiere deutlich."],
+  ["Strauße stecken bei Gefahr den Kopf in den Sand.", false, "Das ist ein Mythos. Sie legen sich flach auf den Boden oder rennen weg."],
+  ["Chamäleons wechseln ihre Farbe vor allem zur Tarnung.", false, "Die Farbe dient vor allem der Kommunikation und der Temperaturregulierung."],
+  ["Bei Seepferdchen tragen die Männchen die Jungen aus.", true, "Die Weibchen legen die Eier in die Bruttasche des Männchens."],
+  ["Wenn man einen Regenwurm teilt, werden daraus zwei Würmer.", false, "Höchstens das Vorderende kann unter Umständen überleben, zwei Würmer entstehen nicht."],
+  ["Honigbienen verständigen sich über einen Schwänzeltanz.", true, "Damit zeigen sie Richtung und Entfernung einer Futterquelle an."],
+  ["Schmetterlinge können mit ihren Füßen schmecken.", true, "Sie haben dort Geschmackssinneszellen."],
+  ["Hunde sehen nur Schwarz und Weiß.", false, "Hunde sehen Farben, aber weniger als Menschen, vor allem Blau und Gelb."],
+  ["Stiere werden wütend, weil das Tuch des Toreros rot ist.", false, "Sie reagieren auf die Bewegung des Tuchs, nicht auf die Farbe."],
+  ["Kamele speichern in ihren Höckern Wasser.", false, "In den Höckern ist Fett gespeichert."],
+  ["Eulen können ihren Kopf um volle 360 Grad drehen.", false, "Sie schaffen etwa 270 Grad."],
+  ["Flamingos sind von Geburt an rosa.", false, "Junge Flamingos sind grau. Die rosa Farbe kommt von Farbstoffen in der Nahrung."],
+  ["Große Pandas ernähren sich fast ausschließlich von Bambus.", true, "Sie sind trotzdem zoologisch Raubtiere."],
+  ["Eisbären haben schwarze Haut unter dem weißen Fell.", true, "Die dunkle Haut nimmt Wärme besser auf."],
+  ["Lemminge stürzen sich als Massenselbstmord von Klippen.", false, "Das ist ein Mythos, der auch durch einen Film von 1958 verbreitet wurde."],
+  ["Kolibris können rückwärts fliegen.", true, "Sie können anhaltend rückwärts fliegen, was bei Vögeln sehr ungewöhnlich ist."],
+  ["Giraffen haben sieben Halswirbel, genau wie Menschen.", true, "Bei Giraffen sind sie extrem lang."],
+  ["Schnecken haben Zähne.", true, "Ihre Raspelzunge, die Radula, ist mit vielen kleinen Zähnchen besetzt."],
+  ["Vögel stammen von Dinosauriern ab.", true, "Sie gelten als lebende Nachfahren der Theropoden."],
+  ["Menschen und Dinosaurier lebten zur selben Zeit.", false, "Die Dinosaurier starben vor etwa 66 Millionen Jahren aus, lange vor dem Menschen."],
+  ["Tomaten sind botanisch gesehen Beeren.", true, "Sie entwickeln sich aus dem Fruchtknoten einer Blüte und haben viele Samen."],
+  ["Kartoffeln gehören zu den Nachtschattengewächsen.", true, "Sie sind mit Tomate und Aubergine verwandt."],
+  ["Erdnüsse sind botanisch gesehen Nüsse.", false, "Erdnüsse sind Hülsenfrüchte."],
+  ["Mandeln sind botanisch gesehen Nüsse.", false, "Die Mandel ist der Samen einer Steinfrucht."],
+  ["Die Haut ist das größte Organ des Menschen.", true, "Sie ist auch das schwerste Organ."],
+  ["Haare und Fingernägel wachsen nach dem Tod weiter.", false, "Die Haut trocknet aus und zieht sich zurück, dadurch wirken sie länger."],
+  ["Venenblut ist blau.", false, "Blut ist immer rot, sauerstoffarmes Blut ist nur dunkler."],
+  ["Die Zunge hat feste Zonen für süß, salzig, sauer und bitter.", false, "Alle Geschmacksrichtungen können auf der gesamten Zunge wahrgenommen werden."],
+  ["Ein Erwachsener hat normalerweise 32 Zähne, wenn alle Weisheitszähne vorhanden sind.", true, "Das ist das vollständige bleibende Gebiss."],
+  ["Die Erde ist eine perfekte Kugel.", false, "Sie ist an den Polen leicht abgeplattet."],
+  ["Auf dem Mond gibt es Wind.", false, "Der Mond hat keine nennenswerte Atmosphäre."],
+  ["Saturn ist der einzige Planet mit Ringen.", false, "Auch Jupiter, Uranus und Neptun haben Ringe."],
+  ["Jupiter ist der größte Planet im Sonnensystem.", true, "Er ist ein Gasriese."],
+  ["Der Merkur ist der sonnennächste Planet.", true, "Er umkreist die Sonne in kürzester Entfernung."],
+  ["Pluto gilt seit 2006 als Zwergplanet.", true, "Die Internationale Astronomische Union hat ihn damals neu eingestuft."],
+  ["Neil Armstrong war der erste Mensch auf dem Mond.", true, "Er betrat ihn im Jahr 1969 bei der Mission Apollo 11."],
+  ["Juri Gagarin war der erste Mensch im Weltall.", true, "Sein Flug fand im Jahr 1961 statt."],
+  ["Ein Lichtjahr ist eine Zeiteinheit.", false, "Es ist eine Längeneinheit, die Strecke, die das Licht in einem Jahr zurücklegt."],
+  ["Sternschnuppen sind verglühende Sterne.", false, "Es sind kleine Staub- und Gesteinsteilchen, die in der Atmosphäre verglühen."],
+  ["Das chemische Symbol für Gold ist Au.", true, "Es kommt vom lateinischen Wort aurum."],
+  ["Das chemische Symbol für Silber ist Si.", false, "Silber hat das Symbol Ag, Si steht für Silicium."],
+  ["Die Luft besteht überwiegend aus Sauerstoff.", false, "Den größten Anteil hat Stickstoff, Sauerstoff macht etwa ein Fünftel aus."],
+  ["Diamant und Graphit bestehen beide aus Kohlenstoff.", true, "Sie unterscheiden sich in der Anordnung der Atome."],
+  ["Schall breitet sich auch im Vakuum aus.", false, "Schall braucht ein Medium wie Luft, Wasser oder einen Festkörper."],
+  ["Eis schwimmt auf Wasser, weil es weniger dicht ist als flüssiges Wasser.", true, "Beim Gefrieren dehnt sich Wasser aus."],
+  ["Donner entsteht durch die schlagartige Ausdehnung der erhitzten Luft im Blitzkanal.", true, "Die Luft dehnt sich so schnell aus, dass eine Druckwelle entsteht."],
+  ["Das Tote Meer liegt am tiefsten Punkt der Erdoberfläche an Land.", true, "Sein Ufer liegt weit unter dem Meeresspiegel."],
+  ["Kolumbus erreichte im Jahr 1492 auf seiner ersten Reise die Karibik.", true, "Wikinger waren schon rund 500 Jahre früher in Nordamerika, Kolumbus war also nicht der erste Europäer dort."],
+  ["Die Französische Revolution begann im Jahr 1789.", true, "Der Sturm auf die Bastille war am 14. Juli 1789."],
+  ["Deutschland wurde im Jahr 1990 wiedervereinigt.", true, "Der Beitritt der DDR erfolgte am 3. Oktober 1990."],
+  ["Die Pyramiden von Gizeh wurden von Sklaven gebaut.", false, "Archäologische Funde zeigen, dass dort bezahlte Arbeiter mit Versorgung arbeiteten."],
+  ["Kleopatra lebte zeitlich näher an der Mondlandung als am Bau der Cheops-Pyramide.", true, "Zwischen Cheops-Pyramide und Kleopatra liegen rund 2500 Jahre, zwischen Kleopatra und Apollo 11 rund 2000 Jahre."],
+  ["Gutenberg erfand im 15. Jahrhundert den Buchdruck mit beweglichen Lettern in Europa.", true, "Seine Bibel entstand um 1455 in Mainz."],
+  ["Der Euro wurde als Bargeld im Jahr 2002 eingeführt.", true, "Als Buchgeld gab es ihn schon seit 1999."],
+  ["Deutschland hat 16 Bundesländer.", true, "Drei davon sind Stadtstaaten: Berlin, Hamburg und Bremen."],
+  ["Das Bundesverfassungsgericht hat seinen Sitz in Karlsruhe.", true, "Dort sitzt es seit seiner Gründung."],
+  ["Von 1949 bis 1990 war Berlin die Hauptstadt der Bundesrepublik.", false, "Bonn war in dieser Zeit Sitz der Bundesorgane und Regierungssitz."],
+  ["Goethe schrieb den Faust.", true, "Faust I erschien 1808, Faust II wurde nach seinem Tod veröffentlicht."],
+  ["Schiller schrieb den Faust.", false, "Der Autor ist Johann Wolfgang von Goethe."],
+  ["Die Mona Lisa hängt im Louvre in Paris.", true, "Gemalt hat sie Leonardo da Vinci."],
+  ["Ludwig van Beethoven war von Geburt an taub.", false, "Er verlor sein Gehör erst im Erwachsenenalter."],
+  ["Das Internet und das World Wide Web sind dasselbe.", false, "Das Web ist nur ein Dienst, der das Internet nutzt."],
+  ["Das World Wide Web wurde von Tim Berners-Lee am CERN entwickelt.", true, "Er schlug es 1989 vor."],
+  ["Die Fußball-Weltmeisterschaft 2018 gewann Deutschland.", false, "Weltmeister 2018 wurde Frankreich."],
+  ["Die Fußball-Weltmeisterschaft 2014 gewann Deutschland.", true, "Das Finale gegen Argentinien fand in Rio de Janeiro statt."],
+  ["Ein Marathon ist 42,195 Kilometer lang.", true, "Das ist die offizielle Streckenlänge."],
+  ["Ein Jahr hat genau 52 Wochen.", false, "Es sind 52 Wochen und ein bis zwei Tage."],
+  ["Die Zahl Pi ist eine rationale Zahl.", false, "Pi ist irrational, ihre Dezimalstellen wiederholen sich nie."],
+  ["Die Zahl 1 ist eine Primzahl.", false, "Eine Primzahl hat genau zwei Teiler, die 1 hat nur einen."],
+  ["Die 2 ist die einzige gerade Primzahl.", true, "Alle anderen geraden Zahlen sind durch 2 teilbar und haben daher mehr Teiler."],
+  ["Die Winkelsumme im Dreieck beträgt 180 Grad.", true, "Das gilt in der ebenen Geometrie."],
+  ["Ein Kilogramm Federn ist leichter als ein Kilogramm Steine.", false, "Beide wiegen ein Kilogramm."],
+  ["Die Olympischen Spiele 2024 fanden in Paris statt.", true, "Es waren die dritten Sommerspiele in Paris."]
 ];
 
 const ROUNDS = 10;
+const SEEN_KEY = "fakt-oder-luege-gesehen";
+const loadSeen = () => { try { return new Set(JSON.parse(localStorage.getItem(SEEN_KEY) || "[]")); } catch (e) { return new Set(); } };
+const saveSeen = set => { try { localStorage.setItem(SEEN_KEY, JSON.stringify([...set])); } catch (e) {} };
+/* Neue Aussagen zuerst: schon gespielte kommen erst wieder, wenn weniger als eine Partie ungespielt ist */
+function buildDeck() {
+  let seen = loadSeen();
+  let fresh = FACTS.filter(f => !seen.has(f[0]));
+  if (fresh.length < ROUNDS) { seen = new Set(); saveSeen(seen); fresh = FACTS.slice(); }
+  return shuffle(fresh);
+}
+function markSeen(statement) { const s = loadSeen(); s.add(statement); saveSeen(s); }
 const app = document.getElementById("app");
 const S = { names: ["Joshua", "Luna"], mode: "quiz", scores: [0, 0], round: 0, deck: [], cur: null, picks: [null, null], first: 0, phase: "start", setter: 0 };
 
@@ -145,7 +239,7 @@ function start() {
     </div>`;
   const go = mode => {
     S.names = [document.getElementById("n0").value.trim() || "Spieler 1", document.getElementById("n1").value.trim() || "Spieler 2"];
-    S.mode = mode; S.scores = [0, 0]; S.round = 0; S.first = 0; S.deck = shuffle(FACTS); S.setter = 0;
+    S.mode = mode; S.scores = [0, 0]; S.round = 0; S.first = 0; S.deck = buildDeck(); S.setter = 0;
     mode === "quiz" ? quizPick(0) : ownSet();
   };
   document.getElementById("m-quiz").onclick = () => go("quiz");
@@ -154,7 +248,7 @@ function start() {
 
 /* ---------- Quiz ---------- */
 function quizPick(step) {
-  if (step === 0) { S.cur = S.deck[S.round]; S.picks = [null, null]; }
+  if (step === 0) { S.cur = S.deck[S.round]; S.picks = [null, null]; markSeen(S.cur[0]); }
   const who = step === 0 ? S.first : 1 - S.first;
   app.innerHTML = `
     ${scoreBar(who)}${progress()}
@@ -250,7 +344,7 @@ function finish() {
       <div class="row"><button class="b-main" id="again">Revanche</button><button class="b-ghost" id="menu">Zum Start</button></div>
     </div>`;
   document.getElementById("again").onclick = () => {
-    S.scores = [0, 0]; S.round = 0; S.deck = shuffle(FACTS); S.first = 0; S.setter = 0;
+    S.scores = [0, 0]; S.round = 0; S.deck = buildDeck(); S.first = 0; S.setter = 0;
     S.mode === "quiz" ? quizPick(0) : ownSet();
   };
   document.getElementById("menu").onclick = start;
